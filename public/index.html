@@ -5,27 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#ff6b00" />
   <meta name="description" content="Avyukt Gym – Morning 5-10 AM & Evening 5-10 PM. ₹500/month. Monday to Saturday. Join on WhatsApp: 9990715771" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Avyukt Gym" />
   <meta property="og:title" content="Avyukt Gym" />
   <meta property="og:description" content="₹500/month | Morning & Evening Batches | Mon–Sat" />
   <title>Avyukt Gym</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <section class="hero" aria-label="Avyukt Gym Hero Section">
-    <div class="hero-glow" aria-hidden="true"></div>
-    <div class="hero-content">
-      <div class="logo-ring" aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="44" height="44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="6" y="22" width="6" height="20" rx="3" fill="#FF6B00" />
-          <rect x="13" y="17" width="7" height="30" rx="3" fill="#FFB703" />
-          <rect x="20" y="29" width="24" height="6" rx="2" fill="#F4F5F8" />
-          <rect x="44" y="17" width="7" height="30" rx="3" fill="#FFB703" />
-          <rect x="52" y="22" width="6" height="20" rx="3" fill="#FF6B00" />
-        </svg>
+  <div id="install-banner" class="install-banner hidden" role="region" aria-label="Install Avyukt Gym App">
+    <div class="install-left">
+      <img src="/icon-192.png" alt="Avyukt Gym" class="install-icon" />
+      <div class="install-copy">
+        <strong>Avyukt Gym App</strong>
+        <span id="install-hint">Phone me install karo – Free &amp; Fast!</span>
       </div>
+    </div>
+    <div class="install-actions">
+      <button id="install-btn" type="button" class="btn-install">Install App</button>
+      <button id="close-banner" type="button" class="btn-close" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <section class="hero" aria-label="Avyukt Gym Hero Section">
+    <div class="hero-content">
+      <img src="/icon-192.png" alt="Avyukt Gym Logo" class="hero-logo" />
 
       <span class="hero-badge">FITNESS FIRST</span>
 
@@ -38,6 +51,10 @@
 
       <div id="gym-status" class="gym-status closed">Checking Status...</div>
       <span id="live-time">--:--:--</span>
+
+      <button id="hero-install-btn" type="button" class="hero-install-btn hidden">
+        Install Avyukt Gym App
+      </button>
 
       <div class="hero-stats">
         <div class="stat-item">
