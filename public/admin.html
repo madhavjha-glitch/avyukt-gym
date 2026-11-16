@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff6b00" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Avyukt Gym" />
+  <title>Avyukt Gym – Owner Admin Panel</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <!-- Auth Gate -->
+  <section id="auth-gate" class="auth-gate">
+    <div class="auth-card">
+      <a href="/index.html" class="back-link">← Back to Gym Home</a>
+      <img src="/icon-192.png" alt="Avyukt Gym" class="auth-logo" />
+      <h1>AVYUKT <span>GYM</span></h1>
+      <p class="auth-subtitle">Avyukt Gym – Owner Login</p>
+      <p class="auth-desc">
+        Members, Attendance aur Fees ko apne Cloud Firestore account ke saath sync karne ke liye Google se Sign In karein.
+      </p>
+
+      <button id="google-signin-btn" type="button" class="btn-google">
+        <span class="g-badge">G</span>
+        <span id="google-signin-label">Sign in with Google</span>
+      </button>
+
+      <div id="auth-error" class="auth-error hidden" role="alert"></div>
+    </div>
+  </section>
+
+  <!-- Authenticated Admin Shell -->
+  <div id="admin-shell" class="admin-shell hidden">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/index.html" class="icon-btn" aria-label="Back to Gym Home">←</a>
+        <img src="/icon-192.png" alt="Avyukt Gym" class="topbar-logo" />
+        <div>
+          <div class="topbar-title">AVYUKT <span>GYM</span></div>
+          <div id="sync-status" class="sync-status online">Cloud Connected</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span id="user-email-badge" class="user-email"></span>
+        <button id="signout-btn" type="button" class="btn-signout">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="shell-main">
+      <!-- DASHBOARD TAB -->
+      <section id="tab-home" class="tab-panel active">
+        <div class="panel-head">
+          <h2>DASHBOARD</h2>
+          <span id="today-date-label" class="muted"></span>
+        </div>
+
+        <div class="kpi-grid">
+          <button type="button" class="kpi-card orange" data-nav="members">
+            <div id="kpi-total-members" class="kpi-value">0</div>
+            <div class="kpi-label">TOTAL MEMBERS</div>
+          </button>
+          <button type="button" class="kpi-card blue" data-nav="attendance">
+            <div id="kpi-today-present" class="kpi-value">0</div>
+            <div class="kpi-label">AAJ AAYE</div>
+          </button>
+          <button type="button" class="kpi-card green" data-nav="fees" data-filter="PAID">
+            <div id="kpi-fees-paid" class="kpi-value">₹0</div>
+            <div class="kpi-label">FEES JAMA</div>
+          </button>
+          <button type="button" class="kpi-card red" data-nav="fees" data-filter="PENDING">
+            <div id="kpi-fees-pending" class="kpi-value">0</div>
+            <div class="kpi-label">FEES BAAKI</div>
+          </button>
+        </div>
+
+        <div id="due-alerts-card" class="admin-card hidden">
+          <div class="card-head">
+            <h3>Fees Due / Expiry Alert</h3>
+            <button type="button" class="text-btn" data-nav="fees" data-filter="PENDING">View All</button>
+          </div>
+          <div id="due-alerts-list" class="stack-list"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-head">
+            <h3>Backup &amp; Export (CSV)</h3>
+          </div>
+          <div class="export-row">
+            <button id="dash-export-fees" type="button" class="btn-outline">Fees CSV</button>
+            <button id="dash-export-att" type="button" class="btn-outline">Attendance CSV</button>
+            <button id="dash-export-members" type="button" class="btn-outline">Members Backup</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEMBERS TAB -->
+      <section id="tab-members" class="tab-panel">
+        <div class="panel-head">
+          <h2>MEMBERS <span id="members-count-pill" class="count-pill">0</span></h2>
+          <div class="head-actions">
+            <button id="members-export-btn" type="button" class="btn-outline small">CSV</button>
+            <button id="open-add-member-btn" type="button" class="btn-primary">+ Add</button>
+          </div>
+        </div>
+
+        <input id="member-search" type="search" class="search-input" placeholder="Name ya phone se dhundho..." />
+
+        <div class="chip-row" id="members-batch-chips">
+          <button type="button" class="chip active" data-batch="ALL">All (0)</button>
+          <button type="button" class="chip" data-batch="MORNING">Morning (0)</button>
+          <button type="button" class="chip" data-batch="EVENING">Evening (0)</button>
+        </div>
+
+        <div id="members-list" class="stack-list"></div>
+      </section>
+
+      <!-- ATTENDANCE TAB -->
+      <section id="tab-attendance" class="tab-panel">
+        <div class="panel-head">
+          <h2>ATTENDANCE</h2>
+          <button id="att-export-btn" type="button" class="btn-outline small">Attendance CSV</button>
+        </div>
+
+        <div class="att-controls">
+          <input id="att-date-picker" type="date" class="date-input" />
+          <button id="mark-all-present-btn" type="button" class="btn-primary small">Sab Present</button>
+          <button id="mark-all-absent-btn" type="button" class="btn-outline small">Sab Absent</button>
+        </div>
+
+        <div class="chip-row" id="att-batch-chips">
+          <button type="button" class="chip active" data-att-batch="ALL">All (0)</button>
+          <button type="button" class="chip" data-att-batch="MORNING">Morning (0)</button>
+          <button type="button" class="chip" data-att-batch="EVENING">Evening (0)</button>
+        </div>
+
+        <div class="mini-kpi-row">
+          <div class="mini-kpi green"><strong id="att-present-count">0</strong><span>Present</span></div>
+          <div class="mini-kpi red"><strong id="att-absent-count">0</strong><span>Absent</span></div>
+          <div class="mini-kpi orange"><strong id="att-total-count">0</strong><span>Total</span></div>
+        </div>
+
+        <div id="attendance-list" class="stack-list"></div>
+      </section>
+
+      <!-- FEES TAB -->
+      <section id="tab-fees" class="tab-panel">
+        <div class="panel-head">
+          <h2>FEES</h2>
+          <div class="head-actions">
+            <button id="fees-export-btn" type="button" class="btn-outline small">Fees CSV</button>
+            <button id="fees-whatsapp-report-btn" type="button" class="btn-whatsapp-sm">Report</button>
+          </div>
+        </div>
+
+        <div class="month-switcher">
+          <button id="fees-prev-month" type="button" class="icon-btn" aria-label="Previous Month">‹</button>
+          <strong id="fees-month-label"></strong>
+          <button id="fees-next-month" type="button" class="icon-btn" aria-label="Next Month">›</button>
+        </div>
+
+        <div class="chip-row" id="fees-filter-chips">
+          <button type="button" class="chip active" data-fee-filter="ALL">All (0)</button>
+          <button type="button" class="chip" data-fee-filter="PENDING">Fees Pending (0)</button>
+          <button type="button" class="chip" data-fee-filter="PAID">Fees Paid (0)</button>
+        </div>
+
+        <div id="fees-list" class="stack-list"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Admin Navigation">
+      <button type="button" class="nav-item active" data-tab="home">Home</button>
+      <button type="button" class="nav-item" data-tab="members">Members</button>
+      <button type="button" class="nav-item" data-tab="attendance">Attendance</button>
+      <button type="button" class="nav-item" data-tab="fees">Fees</button>
+    </nav>
+  </div>
+
+  <!-- Add/Edit Member Modal -->
+  <div id="member-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3 id="member-modal-title">Naya Member</h3>
+      <form id="member-form" class="modal-form">
+        <label>Naam *
+          <input id="form-name" type="text" required maxlength="80" placeholder="Jaise: Rahul Sharma" />
+        </label>
+        <label>Phone Number *
+          <input id="form-phone" type="tel" required minlength="10" maxlength="10" placeholder="10 digit number" />
+        </label>
+        <label>Batch
+          <select id="form-batch">
+            <option value="MORNING">Morning (5–10 AM)</option>
+            <option value="EVENING">Evening (5–10 PM)</option>
+            <option value="BOTH">Both Batches</option>
+          </select>
+        </label>
+        <label>Joining Date
+          <input id="form-join-date" type="date" required />
+        </label>
+        <div class="modal-actions">
+          <button id="member-modal-cancel" type="button" class="btn-outline">Cancel</button>
+          <button id="member-modal-save" type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Member History Modal -->
+  <div id="history-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="card-head">
+        <div>
+          <h3 id="history-member-name">Member</h3>
+          <p id="history-member-meta" class="muted"></p>
+        </div>
+        <button id="history-close-btn" type="button" class="icon-btn" aria-label="Close">✕</button>
+      </div>
+      <div id="history-content" class="stack-list history-scroll"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>

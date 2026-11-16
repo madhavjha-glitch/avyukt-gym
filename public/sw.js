@@ -1,9 +1,12 @@
-const CACHE_NAME = 'avyukt-gym-v1';
+const CACHE_NAME = 'avyukt-gym-v3';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/admin.html',
   '/style.css',
+  '/admin.css',
   '/app.js',
+  '/admin.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
@@ -44,7 +47,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(() => caches.match(url.pathname === '/admin.html' || url.pathname === '/admin' ? '/admin.html' : '/index.html'))
     );
     return;
   }

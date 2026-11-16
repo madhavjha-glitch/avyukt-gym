@@ -451,9 +451,30 @@ body {
 }
 
 .btn-whatsapp:hover,
-.btn-call:hover {
+.btn-call:hover,
+.btn-admin:hover {
   transform: translateY(-1px);
   opacity: 0.95;
+}
+
+.admin-entry-section {
+  text-align: center;
+}
+
+.btn-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: rgba(255, 107, 0, 0.14);
+  border: 1px solid rgba(255, 107, 0, 0.45);
+  color: var(--orange);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .footer {

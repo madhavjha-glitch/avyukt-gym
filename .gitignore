@@ -1,6 +1,9 @@
 *.iml
 .gradle
 .idea
+.kotlin/
+.build-outputs/
 build/
 app/build/
 *-debug.log
+local.properties
