@@ -1,0 +1,368 @@
+:root {
+  --bg: #0b0d12;
+  --surface: #141821;
+  --elevated: #1c222e;
+  --border: #283040;
+  --orange: #ff6b00;
+  --amber: #ffb703;
+  --green: #25d366;
+  --red: #e63946;
+  --text: #f4f5f8;
+  --muted: #98a2b3;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 64px 20px 44px;
+  text-align: center;
+  background: radial-gradient(circle at top center, rgba(255, 107, 0, 0.22), transparent 60%),
+              linear-gradient(180deg, #121620 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-content {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.logo-ring {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--orange);
+  box-shadow: 0 0 28px rgba(255, 107, 0, 0.25);
+  display: grid;
+  place-items: center;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 999px;
+  background: rgba(255, 107, 0, 0.16);
+  border: 1px solid rgba(255, 107, 0, 0.45);
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hero h1 {
+  margin-top: 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(2.6rem, 8vw, 4.2rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: 2px;
+}
+
+.hero h1 span {
+  display: block;
+  background: linear-gradient(90deg, var(--orange), var(--amber));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-tagline {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.gym-status {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gym-status.open {
+  background: rgba(37, 211, 102, 0.14);
+  border: 1px solid rgba(37, 211, 102, 0.45);
+  color: var(--green);
+}
+
+.gym-status.closed {
+  background: rgba(230, 57, 70, 0.14);
+  border: 1px solid rgba(230, 57, 70, 0.35);
+  color: var(--red);
+}
+
+#live-time {
+  display: block;
+  margin-top: 8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-stats {
+  margin: 26px auto 0;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px 12px;
+  background: rgba(20, 24, 33, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.stat-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 34px;
+  background: var(--border);
+}
+
+.main-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 16px 48px;
+  display: grid;
+  gap: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-dot {
+  width: 4px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--orange);
+}
+
+.section-header h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 1px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.timing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.timing-card {
+  text-align: center;
+}
+
+.session-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.session-pill.morning {
+  background: rgba(255, 107, 0, 0.16);
+  color: var(--orange);
+}
+
+.session-pill.evening {
+  background: rgba(255, 183, 3, 0.16);
+  color: var(--amber);
+}
+
+.time-range {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.time-to {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.days-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.day-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.day-chip.open {
+  background: rgba(37, 211, 102, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.day-chip.closed {
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+}
+
+.fees-card {
+  text-align: center;
+  border-color: rgba(255, 107, 0, 0.35);
+}
+
+.fees-popular {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 183, 3, 0.16);
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fees-label {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.fees-amount {
+  margin-top: 4px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1;
+}
+
+.fees-currency {
+  font-size: 2rem;
+  vertical-align: top;
+}
+
+.fees-period {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.fees-perks {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.perk-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.join-card {
+  text-align: center;
+}
+
+.join-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 6px;
+}
+
+.join-card p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.cta-group {
+  display: grid;
+  gap: 10px;
+}
+
+.btn-whatsapp,
+.btn-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-whatsapp {
+  background: var(--green);
+  color: #062110;
+}
+
+.btn-call {
+  background: var(--elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-whatsapp:hover,
+.btn-call:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.footer {
+  padding: 20px 16px 32px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
