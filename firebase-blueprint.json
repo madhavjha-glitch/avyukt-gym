@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "A gym member registered in the owner's Amit Fitness Gym workspace.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the gym member."
+        },
+        "phone": {
+          "type": "string",
+          "description": "10-digit phone number of the gym member."
+        },
+        "joinDate": {
+          "type": "string",
+          "description": "Joining date formatted as YYYY-MM-DD."
+        },
+        "batch": {
+          "type": "string",
+          "enum": ["MORNING", "EVENING", "BOTH"],
+          "description": "Member workout batch: MORNING, EVENING, or BOTH."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "name", "phone", "joinDate", "createdAt", "updatedAt"]
+    },
+    "AttendanceDay": {
+      "title": "AttendanceDay",
+      "description": "Daily attendance map keyed by memberId for a specific YYYY-MM-DD date.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "date": {
+          "type": "string",
+          "description": "Attendance date formatted as YYYY-MM-DD."
+        },
+        "records": {
+          "type": "object",
+          "description": "Map of memberId to boolean present/absent status."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "date", "records", "createdAt", "updatedAt"]
+    },
+    "FeeMonth": {
+      "title": "FeeMonth",
+      "description": "Monthly fee payment records keyed by memberId for a specific YYYY-MM month.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "month": {
+          "type": "string",
+          "description": "Billing month formatted as YYYY-MM."
+        },
+        "records": {
+          "type": "object",
+          "description": "Map of memberId to fee status object containing paid (boolean) and optional paidDate (YYYY-MM-DD)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "month", "records", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Gym members owned by the authenticated gym owner."
+    },
+    "/users/{userId}/attendance/{dateId}": {
+      "schema": { "$ref": "#/entities/AttendanceDay" },
+      "description": "Daily attendance records keyed by YYYY-MM-DD for the authenticated gym owner."
+    },
+    "/users/{userId}/fees/{monthId}": {
+      "schema": { "$ref": "#/entities/FeeMonth" },
+      "description": "Monthly membership fee payment records keyed by YYYY-MM for the authenticated gym owner."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Avyukt Gym",
+  "description": "Avyukt Gym Android app with live open status, batch timings, membership fees, WhatsApp join, and cloud-backed owner admin panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
