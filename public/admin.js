@@ -23,20 +23,20 @@ import {
 } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyD6-yWulzAV6KjNwdKkdixUL_9Zu9zfEns',
-  authDomain: 'gen-lang-client-0348634100.firebaseapp.com',
-  projectId: 'gen-lang-client-0348634100',
-  storageBucket: 'gen-lang-client-0348634100.firebasestorage.app',
-  messagingSenderId: '820758551230'
+  apiKey: 'AIzaSyClpe-ccQIphDSknUjKIG4fawsyxfPBKLs',
+  authDomain: 'avyukt-gym.firebaseapp.com',
+  projectId: 'avyukt-gym',
+  storageBucket: 'avyukt-gym.firebasestorage.app',
+  messagingSenderId: '531967221920',
+  appId: '1:531967221920:web:3c9606cee69d3a9dc9a9c5'
 };
 
-const DATABASE_ID = 'ai-studio-android-amitfitn-219243c0-c068-4149-80cb-3c0b1ea3a029';
 const FEES_AMOUNT = 500;
 const OWNER_PHONE_RAW = '919990715771';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app, DATABASE_ID);
+const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 const authGate = document.getElementById('auth-gate');
@@ -133,13 +133,23 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+function formatAuthError(err) {
+  const code = err?.code || '';
+  if (code === 'auth/unauthorized-domain') {
+    return `Domain "${window.location.hostname}" Firebase Authorized Domains me add nahi hai. Firebase Console (avyukt-gym) → Authentication → Settings → Authorized domains me "${window.location.hostname}" add karein.`;
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return 'Firebase Console (avyukt-gym) → Authentication → Sign-in method me Google provider enable karein.';
+  }
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in cancel ho gaya. Dobara try karein.';
+  }
+  return err?.message || 'Google Sign-In fail ho gaya.';
+}
+
 getRedirectResult(auth).catch((err) => {
-  if (err?.code === 'auth/unauthorized-domain') {
-    authError.textContent =
-      `Domain "${window.location.hostname}" Firebase Authorized Domains me add nahi hai. Firebase Console → Authentication → Settings → Authorized domains me "${window.location.hostname}" add karein.`;
-    authError.classList.remove('hidden');
-  } else if (err?.message) {
-    authError.textContent = err.message;
+  if (err) {
+    authError.textContent = formatAuthError(err);
     authError.classList.remove('hidden');
   }
 });
@@ -157,15 +167,10 @@ signInBtn.addEventListener('click', async () => {
         await signInWithRedirect(auth, googleProvider);
         return;
       } catch (redirectErr) {
-        authError.textContent = redirectErr?.message || 'Google Sign-In redirect fail ho gaya.';
+        authError.textContent = formatAuthError(redirectErr);
       }
-    } else if (code === 'auth/unauthorized-domain') {
-      authError.textContent =
-        `Domain "${window.location.hostname}" Firebase Authorized Domains me add nahi hai. Firebase Console → Authentication → Settings → Authorized domains me "${window.location.hostname}" add karein.`;
-    } else if (code === 'auth/popup-closed-by-user') {
-      authError.textContent = 'Sign-in cancel ho gaya. Dobara try karein.';
     } else {
-      authError.textContent = err?.message || 'Google Sign-In fail ho gaya.';
+      authError.textContent = formatAuthError(err);
     }
     authError.classList.remove('hidden');
   } finally {
