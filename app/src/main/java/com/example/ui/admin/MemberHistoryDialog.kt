@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Call
@@ -49,6 +50,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.DueUrgency
 import com.example.data.model.FeeStatus
@@ -56,16 +58,16 @@ import com.example.data.model.GymBatch
 import com.example.data.model.GymConstants
 import com.example.data.model.GymMember
 import com.example.data.model.computeMemberDueInfo
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymBlue
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
-import com.example.ui.theme.GymDarkSurface
-import com.example.ui.theme.GymElevated
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -131,12 +133,12 @@ fun MemberHistoryBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = GymDarkSurface
+        containerColor = GymSurface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 18.dp)
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -149,15 +151,18 @@ fun MemberHistoryBottomSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = member.name,
-                        style = MaterialTheme.typography.titleLarge.copy(color = GymTextPrimary)
+                        style = MaterialTheme.typography.titleLarge.copy(color = GymInk)
                     )
                     Text(
                         text = "${member.phone} • ${batch.label} (${batch.timingHint})",
-                        style = MaterialTheme.typography.bodySmall.copy(color = GymTextMuted)
+                        style = MaterialTheme.typography.bodySmall.copy(color = GymInkSecondary)
                     )
                     Text(
                         text = "Joining: ${AdminViewModel.formatDisplayDate(member.joinDate)}",
-                        style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = GymInkMuted,
+                            letterSpacing = 0.sp
+                        )
                     )
                 }
 
@@ -184,24 +189,23 @@ fun MemberHistoryBottomSheet(
                     Icon(
                         imageVector = Icons.Rounded.Edit,
                         contentDescription = "Edit ${member.name}",
-                        tint = GymOrange
+                        tint = GymInkSecondary
                     )
                 }
             }
 
-            // Due / Expiry Status Banner
             val (dueColor, dueLabel) = when (dueInfo.urgency) {
                 DueUrgency.PAID -> GymGreen to "Current Month Paid • Next due ${dueInfo.dueDate.format(DateTimeFormatter.ofPattern("dd MMM"))}"
                 DueUrgency.OVERDUE -> GymRed to "Overdue by ${-dueInfo.daysRemaining}d (Due ${dueInfo.dueDate.format(DateTimeFormatter.ofPattern("dd MMM"))})"
-                DueUrgency.DUE_SOON -> GymOrange to if (dueInfo.daysRemaining == 0L) "Fees Due Today!" else "Due in ${dueInfo.daysRemaining}d (${dueInfo.dueDate.format(DateTimeFormatter.ofPattern("dd MMM"))})"
+                DueUrgency.DUE_SOON -> GymAccent to if (dueInfo.daysRemaining == 0L) "Fees Due Today!" else "Due in ${dueInfo.daysRemaining}d (${dueInfo.dueDate.format(DateTimeFormatter.ofPattern("dd MMM"))})"
                 DueUrgency.UPCOMING -> GymBlue to "Next due: ${dueInfo.dueDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))}"
             }
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = dueColor.copy(alpha = 0.12f),
-                border = BorderStroke(1.dp, dueColor.copy(alpha = 0.3f))
+                shape = RoundedCornerShape(14.dp),
+                color = dueColor.copy(alpha = 0.08f),
+                border = BorderStroke(1.dp, dueColor.copy(alpha = 0.28f))
             ) {
                 Row(
                     modifier = Modifier
@@ -239,7 +243,7 @@ fun MemberHistoryBottomSheet(
                                 runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
                             },
                             modifier = Modifier.minimumInteractiveComponentSize(),
-                            shape = RoundedCornerShape(50),
+                            shape = CircleShape,
                             border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.4f)),
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                         ) {
@@ -252,23 +256,25 @@ fun MemberHistoryBottomSheet(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Remind",
-                                style = MaterialTheme.typography.labelSmall.copy(color = GymGreen)
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = GymGreen,
+                                    letterSpacing = 0.sp
+                                )
                             )
                         }
                     }
                 }
             }
 
-            // Summary Stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Surface(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    color = GymCardBg,
-                    border = BorderStroke(1.dp, GymBorder)
+                    shape = RoundedCornerShape(16.dp),
+                    color = GymPaper,
+                    border = BorderStroke(1.dp, GymLine)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -276,11 +282,17 @@ fun MemberHistoryBottomSheet(
                     ) {
                         Text(
                             text = "$thisMonthPresentDays days",
-                            style = MaterialTheme.typography.titleMedium.copy(color = GymOrange, fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = GymAccent,
+                                fontWeight = FontWeight.ExtraBold
+                            )
                         )
                         Text(
                             text = "This Month ($totalPresentDays total)",
-                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymInkMuted,
+                                letterSpacing = 0.sp
+                            )
                         )
                     }
                 }
@@ -288,9 +300,9 @@ fun MemberHistoryBottomSheet(
                 val paidMonthsCount = feeMonthsList.count { allFeeMonths[it]?.get(member.id)?.paid == true }
                 Surface(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    color = GymCardBg,
-                    border = BorderStroke(1.dp, GymBorder)
+                    shape = RoundedCornerShape(16.dp),
+                    color = GymPaper,
+                    border = BorderStroke(1.dp, GymLine)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -298,17 +310,22 @@ fun MemberHistoryBottomSheet(
                     ) {
                         Text(
                             text = "$paidMonthsCount / ${feeMonthsList.size} mo",
-                            style = MaterialTheme.typography.titleMedium.copy(color = GymGreen, fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = GymGreen,
+                                fontWeight = FontWeight.ExtraBold
+                            )
                         )
                         Text(
                             text = "Months Fees Paid",
-                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymInkMuted,
+                                letterSpacing = 0.sp
+                            )
                         )
                     }
                 }
             }
 
-            // Sub-Tab Switcher
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -331,7 +348,7 @@ fun MemberHistoryBottomSheet(
                 )
             }
 
-            HorizontalDivider(color = GymBorder)
+            HorizontalDivider(color = GymLine)
 
             LazyColumn(
                 modifier = Modifier
@@ -346,21 +363,21 @@ fun MemberHistoryBottomSheet(
                         val accent = if (isPaid) GymGreen else GymRed
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(1.dp, GymBorder)
+                            shape = RoundedCornerShape(14.dp),
+                            color = GymPaper,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
                                     Text(
                                         text = AdminViewModel.formatMonthLabel(month),
-                                        style = MaterialTheme.typography.titleSmall.copy(color = GymTextPrimary)
+                                        style = MaterialTheme.typography.titleSmall.copy(color = GymInk)
                                     )
                                     Text(
                                         text = if (isPaid && !fee?.paidDate.isNullOrBlank()) {
@@ -368,7 +385,10 @@ fun MemberHistoryBottomSheet(
                                         } else {
                                             "₹${GymConstants.FEES_AMOUNT} • ${if (isPaid) "Paid" else "Pending"}"
                                         },
-                                        style = MaterialTheme.typography.labelSmall.copy(color = accent)
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = accent,
+                                            letterSpacing = 0.sp
+                                        )
                                     )
                                 }
 
@@ -395,15 +415,16 @@ fun MemberHistoryBottomSheet(
                                         onClick = { onSetFeeForMonth(month, member.id, !isPaid) },
                                         enabled = !isSavingFee,
                                         modifier = Modifier.minimumInteractiveComponentSize(),
-                                        shape = RoundedCornerShape(50),
-                                        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
+                                        shape = CircleShape,
+                                        border = BorderStroke(1.dp, accent.copy(alpha = 0.4f)),
                                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                     ) {
                                         Text(
                                             text = stringResource(if (isPaid) R.string.paid_badge else R.string.pending_badge),
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 color = accent,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 0.sp
                                             )
                                         )
                                     }
@@ -423,13 +444,13 @@ fun MemberHistoryBottomSheet(
                                 Icon(
                                     imageVector = Icons.Rounded.EventAvailable,
                                     contentDescription = null,
-                                    tint = GymTextMuted.copy(alpha = 0.5f),
+                                    tint = GymInkMuted.copy(alpha = 0.5f),
                                     modifier = Modifier.size(36.dp)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = "Abhi tak koi attendance record nahi hai.",
-                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted)
                                 )
                             }
                         }
@@ -438,20 +459,20 @@ fun MemberHistoryBottomSheet(
                             val accent = if (present) GymGreen else GymRed
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                color = GymCardBg,
-                                border = BorderStroke(1.dp, GymBorder)
+                                shape = RoundedCornerShape(14.dp),
+                                color = GymPaper,
+                                border = BorderStroke(1.dp, GymLine)
                             ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                        .padding(horizontal = 14.dp, vertical = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
                                         text = AdminViewModel.formatDisplayDate(date),
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymTextPrimary)
+                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymInk)
                                     )
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
@@ -491,9 +512,9 @@ private fun HistoryTabChip(
     Surface(
         onClick = onClick,
         modifier = modifier.minimumInteractiveComponentSize(),
-        shape = RoundedCornerShape(50),
-        color = if (selected) GymOrange.copy(alpha = 0.18f) else GymElevated,
-        border = BorderStroke(1.dp, if (selected) GymOrange else GymBorder)
+        shape = CircleShape,
+        color = if (selected) GymInk else GymPaper,
+        border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
     ) {
         Row(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp),
@@ -503,7 +524,7 @@ private fun HistoryTabChip(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    color = if (selected) GymOrange else GymTextMuted,
+                    color = if (selected) GymPaper else GymInkSecondary,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                 )
             )

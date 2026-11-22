@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
@@ -43,20 +44,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.FeeStatus
 import com.example.data.model.GymBatch
 import com.example.data.model.GymConstants
 import com.example.data.model.GymMember
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymAmber
 import com.example.ui.theme.GymBlue
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
 import com.example.ui.theme.GymElevated
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
+import com.example.ui.theme.GymSurface
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -84,34 +88,31 @@ fun AdminAnalyticsCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("dash_analytics_card"),
-        shape = RoundedCornerShape(16.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, GymBorder)
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.BarChart,
-                        contentDescription = null,
-                        tint = GymOrange,
-                        modifier = Modifier.size(20.dp)
+                Icon(
+                    imageVector = Icons.Rounded.BarChart,
+                    contentDescription = null,
+                    tint = GymInk,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = stringResource(R.string.analytics_title),
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = GymInk,
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = stringResource(R.string.analytics_title),
-                        style = MaterialTheme.typography.titleSmall.copy(color = GymTextPrimary)
-                    )
-                }
+                )
             }
 
             Row(
@@ -126,9 +127,9 @@ fun AdminAnalyticsCard(
                             .weight(1f)
                             .minimumInteractiveComponentSize()
                             .testTag("analytics_tab_${tab.name.lowercase()}"),
-                        shape = RoundedCornerShape(50),
-                        color = if (selected) GymOrange.copy(alpha = 0.2f) else GymElevated,
-                        border = BorderStroke(1.dp, if (selected) GymOrange else GymBorder)
+                        shape = CircleShape,
+                        color = if (selected) GymInk else GymPaper,
+                        border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
                     ) {
                         Box(
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
@@ -137,8 +138,9 @@ fun AdminAnalyticsCard(
                             Text(
                                 text = stringResource(tab.labelRes),
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = if (selected) GymOrange else GymTextMuted,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                    color = if (selected) GymPaper else GymInkSecondary,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    letterSpacing = 0.sp
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -148,7 +150,7 @@ fun AdminAnalyticsCard(
                 }
             }
 
-            HorizontalDivider(color = GymBorder)
+            HorizontalDivider(color = GymLine)
 
             when (selectedTab) {
                 AnalyticsTab.REVENUE -> RevenueSixMonthChart(
@@ -199,20 +201,26 @@ private fun RevenueSixMonthChart(
             Column {
                 Text(
                     text = "Last 6 Months Total",
-                    style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        letterSpacing = 0.sp
+                    )
                 )
                 Text(
                     text = "₹${currencyFormatter.format(total6Mo)}",
                     style = MaterialTheme.typography.titleLarge.copy(
                         color = GymGreen,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold
                     )
                 )
             }
             val currentPaid = monthSeries.lastOrNull()?.third ?: 0
             Text(
                 text = "Is Mahine: $currentPaid/${members.size} Paid",
-                style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = GymInkMuted,
+                    letterSpacing = 0.sp
+                )
             )
         }
 
@@ -231,13 +239,14 @@ private fun RevenueSixMonthChart(
                 ) {
                     monthSeries.forEach { (_, amount, _) ->
                         Text(
-                            text = if (amount > 0) "₹${amount / 1000.0}".let {
+                            text = if (amount > 0) {
                                 if (amount >= 1000) "₹${String.format(Locale.US, "%.1fk", amount / 1000f)}" else "₹$amount"
                             } else "₹0",
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = if (amount > 0) GymGreen else GymTextMuted
+                                color = if (amount > 0) GymGreen else GymInkMuted,
+                                letterSpacing = 0.sp
                             )
                         )
                     }
@@ -248,8 +257,8 @@ private fun RevenueSixMonthChart(
                         .height(112.dp)
                 ) {
                     val slotWidth = size.width / monthSeries.size
-                    val barWidth = (slotWidth * 0.46f).coerceAtMost(36.dp.toPx())
-                    val gridColor = Color(0xFF2B2F3A)
+                    val barWidth = (slotWidth * 0.44f).coerceAtMost(32.dp.toPx())
+                    val gridColor = Color(0xFFEAE8E0)
 
                     for (i in 0..2) {
                         val y = size.height * (i / 2f)
@@ -267,10 +276,7 @@ private fun RevenueSixMonthChart(
                         val left = index * slotWidth + (slotWidth - barWidth) / 2f
                         val top = size.height - barHeight
                         drawRoundRect(
-                            brush = Brush.verticalGradient(
-                                colors = if (amount > 0) listOf(GymGreen, GymGreen.copy(alpha = 0.55f))
-                                else listOf(GymElevated, GymElevated)
-                            ),
+                            color = if (amount > 0) GymGreen else GymElevated,
                             topLeft = Offset(left, top),
                             size = Size(barWidth, barHeight),
                             cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
@@ -286,7 +292,10 @@ private fun RevenueSixMonthChart(
                             text = label,
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymInkMuted,
+                                letterSpacing = 0.sp
+                            )
                         )
                     }
                 }
@@ -327,19 +336,25 @@ private fun AttendanceSevenDayChart(
             Column {
                 Text(
                     text = "7-Day Daily Avg",
-                    style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        letterSpacing = 0.sp
+                    )
                 )
                 Text(
                     text = "$avg members/day",
                     style = MaterialTheme.typography.titleLarge.copy(
                         color = GymBlue,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold
                     )
                 )
             }
             Text(
                 text = "Peak: ${daySeries.maxOfOrNull { it.second } ?: 0}",
-                style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = GymInkMuted,
+                    letterSpacing = 0.sp
+                )
             )
         }
 
@@ -357,7 +372,8 @@ private fun AttendanceSevenDayChart(
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = if (count > 0) GymBlue else GymTextMuted
+                                color = if (count > 0) GymBlue else GymInkMuted,
+                                letterSpacing = 0.sp
                             )
                         )
                     }
@@ -386,7 +402,7 @@ private fun AttendanceSevenDayChart(
                         drawPath(
                             path = fillPath,
                             brush = Brush.verticalGradient(
-                                listOf(GymBlue.copy(alpha = 0.32f), Color.Transparent)
+                                listOf(GymBlue.copy(alpha = 0.16f), Color.Transparent)
                             )
                         )
 
@@ -403,7 +419,7 @@ private fun AttendanceSevenDayChart(
 
                     points.forEach { pt ->
                         drawCircle(color = GymBlue, radius = 4.dp.toPx(), center = pt)
-                        drawCircle(color = GymCardBg, radius = 2.dp.toPx(), center = pt)
+                        drawCircle(color = GymSurface, radius = 2.dp.toPx(), center = pt)
                     }
                 }
 
@@ -416,7 +432,10 @@ private fun AttendanceSevenDayChart(
                             text = dayLabel,
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymInkMuted,
+                                letterSpacing = 0.sp
+                            )
                         )
                     }
                 }
@@ -440,13 +459,16 @@ private fun BatchStrengthChart(members: List<GymMember>) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "Total Members: $total",
-            style = MaterialTheme.typography.titleMedium.copy(color = GymTextPrimary)
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = GymInk,
+                fontWeight = FontWeight.Bold
+            )
         )
 
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(14.dp)
+                .height(12.dp)
         ) {
             val w = size.width
             val h = size.height
@@ -460,7 +482,7 @@ private fun BatchStrengthChart(members: List<GymMember>) {
                 cornerRadius = CornerRadius(h / 2f, h / 2f)
             )
             if (mW > 0f) {
-                drawRect(color = GymOrange, topLeft = Offset(0f, 0f), size = Size(mW, h))
+                drawRect(color = GymAccent, topLeft = Offset(0f, 0f), size = Size(mW, h))
             }
             if (eW > 0f) {
                 drawRect(color = GymBlue, topLeft = Offset(mW, 0f), size = Size(eW, h))
@@ -479,7 +501,7 @@ private fun BatchStrengthChart(members: List<GymMember>) {
                 label = "Morning",
                 count = morningCount,
                 total = total,
-                color = GymOrange
+                color = GymAccent
             )
             BatchLegendChip(
                 modifier = Modifier.weight(1f),
@@ -510,9 +532,9 @@ private fun BatchLegendChip(
     val pct = if (total > 0) (count * 100) / total else 0
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = color.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, color.copy(alpha = 0.35f))
+        shape = RoundedCornerShape(14.dp),
+        color = GymPaper,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Column(
             modifier = Modifier.padding(10.dp),
@@ -522,12 +544,15 @@ private fun BatchLegendChip(
                 text = count.toString(),
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = color,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
             )
             Text(
                 text = "$label ($pct%)",
-                style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = GymInkMuted,
+                    letterSpacing = 0.sp
+                ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -547,13 +572,13 @@ private fun AnalyticsEmptyHint() {
             Icon(
                 imageVector = Icons.Rounded.BarChart,
                 contentDescription = null,
-                tint = GymTextMuted.copy(alpha = 0.4f),
-                modifier = Modifier.size(34.dp)
+                tint = GymInkMuted.copy(alpha = 0.45f),
+                modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = stringResource(R.string.analytics_no_data),
-                style = MaterialTheme.typography.bodySmall.copy(color = GymTextMuted)
+                style = MaterialTheme.typography.bodySmall.copy(color = GymInkMuted)
             )
         }
     }

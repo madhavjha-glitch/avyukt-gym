@@ -23,7 +23,6 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.CurrencyRupee
-import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.HourglassEmpty
@@ -52,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.DueUrgency
 import com.example.data.model.FeeFilter
@@ -62,15 +62,16 @@ import com.example.data.model.SyncState
 import com.example.data.model.UiState
 import com.example.data.model.computeMemberDueInfo
 import com.example.ui.theme.AvatarPalette
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymBlue
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
 import com.example.ui.theme.GymElevated
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -120,32 +121,28 @@ fun AdminDashboardTab(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Dashboard,
-                        contentDescription = null,
-                        tint = GymOrange
+                Text(
+                    text = "Dashboard",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = GymInk,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                    Text(
-                        text = "DASHBOARD",
-                        style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary)
-                    )
-                }
+                )
                 Text(
                     text = todayHeader,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = GymInkMuted,
+                        fontWeight = FontWeight.Medium
+                    )
                 )
             }
         }
@@ -154,7 +151,7 @@ fun AdminDashboardTab(
             item {
                 val (bannerColor, bannerIcon, bannerMsg) = when (syncState) {
                     SyncState.OFFLINE_SAVED -> Triple(
-                        GymOrange,
+                        GymAccent,
                         Icons.Rounded.CloudOff,
                         "Offline Mode active — saare changes device par save ho rahe hain aur internet aate hi cloud me sync honge."
                     )
@@ -167,12 +164,12 @@ fun AdminDashboardTab(
                 }
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = bannerColor.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, bannerColor.copy(alpha = 0.35f))
+                    shape = RoundedCornerShape(16.dp),
+                    color = bannerColor.copy(alpha = 0.09f),
+                    border = BorderStroke(1.dp, bannerColor.copy(alpha = 0.28f))
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
@@ -183,7 +180,10 @@ fun AdminDashboardTab(
                         )
                         Text(
                             text = bannerMsg,
-                            style = MaterialTheme.typography.bodySmall.copy(color = bannerColor)
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = GymInk,
+                                fontWeight = FontWeight.Medium
+                            )
                         )
                     }
                 }
@@ -191,10 +191,10 @@ fun AdminDashboardTab(
         }
 
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DashboardStatCard(
                         modifier = Modifier
@@ -203,7 +203,7 @@ fun AdminDashboardTab(
                         icon = Icons.Rounded.Group,
                         value = totalMembers.toString(),
                         label = stringResource(R.string.total_members),
-                        accent = GymOrange,
+                        accent = GymAccent,
                         onClick = onOpenMembers
                     )
                     DashboardStatCard(
@@ -219,7 +219,7 @@ fun AdminDashboardTab(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DashboardStatCard(
                         modifier = Modifier
@@ -251,15 +251,15 @@ fun AdminDashboardTab(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("dash_expiry_alert_card"),
-                    shape = RoundedCornerShape(16.dp),
-                    color = GymCardBg,
-                    border = BorderStroke(1.dp, GymRed.copy(alpha = 0.35f))
+                    shape = RoundedCornerShape(20.dp),
+                    color = GymSurface,
+                    border = BorderStroke(1.dp, GymLine)
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 18.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -271,23 +271,33 @@ fun AdminDashboardTab(
                                     imageVector = Icons.Rounded.NotificationsActive,
                                     contentDescription = null,
                                     tint = GymRed,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                                 Text(
                                     text = "${stringResource(R.string.expiry_alert_title)} (${dueAlertMembers.size})",
-                                    style = MaterialTheme.typography.titleSmall.copy(color = GymTextPrimary)
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        color = GymInk,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
                             }
                             TextButton(
                                 onClick = { onOpenFees(FeeFilter.PENDING) },
                                 modifier = Modifier.minimumInteractiveComponentSize()
                             ) {
-                                Text("View All", color = GymOrange)
+                                Text(
+                                    text = "View All",
+                                    color = GymAccent,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
-                        HorizontalDivider(color = GymBorder)
-                        dueAlertMembers.take(4).forEach { (member, due) ->
-                            val badgeColor = if (due.urgency == DueUrgency.OVERDUE) GymRed else GymOrange
+                        HorizontalDivider(color = GymLine)
+                        dueAlertMembers.take(4).forEachIndexed { idx, (member, due) ->
+                            if (idx > 0) {
+                                HorizontalDivider(color = GymLine)
+                            }
+                            val badgeColor = if (due.urgency == DueUrgency.OVERDUE) GymRed else GymAccent
                             val badgeText = when {
                                 due.daysRemaining < 0L -> "Overdue ${-due.daysRemaining}d"
                                 due.daysRemaining == 0L -> "Due Today"
@@ -300,7 +310,7 @@ fun AdminDashboardTab(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        .padding(horizontal = 18.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -308,7 +318,7 @@ fun AdminDashboardTab(
                                         Text(
                                             text = member.name,
                                             style = MaterialTheme.typography.bodyMedium.copy(
-                                                color = GymTextPrimary,
+                                                color = GymInk,
                                                 fontWeight = FontWeight.SemiBold
                                             ),
                                             maxLines = 1,
@@ -316,20 +326,21 @@ fun AdminDashboardTab(
                                         )
                                         Text(
                                             text = "Due: ${due.dueDate.format(DateTimeFormatter.ofPattern("dd MMM"))} • ₹${GymConstants.FEES_AMOUNT}",
-                                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                                            style = MaterialTheme.typography.bodySmall.copy(color = GymInkMuted)
                                         )
                                     }
                                     Surface(
-                                        shape = RoundedCornerShape(50),
-                                        color = badgeColor.copy(alpha = 0.16f)
+                                        shape = CircleShape,
+                                        color = badgeColor.copy(alpha = 0.12f)
                                     ) {
                                         Text(
                                             text = badgeText,
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 color = badgeColor,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 0.sp
                                             ),
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                         )
                                     }
                                 }
@@ -340,7 +351,6 @@ fun AdminDashboardTab(
             }
         }
 
-        // Analytics & Trends Card
         item {
             AdminAnalyticsCard(
                 members = members,
@@ -349,17 +359,16 @@ fun AdminDashboardTab(
             )
         }
 
-        // Backup & Export CSV Card
         item {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = GymCardBg,
-                border = BorderStroke(1.dp, GymBorder)
+                shape = RoundedCornerShape(20.dp),
+                color = GymSurface,
+                border = BorderStroke(1.dp, GymLine)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -368,12 +377,15 @@ fun AdminDashboardTab(
                         Icon(
                             imageVector = Icons.Rounded.Download,
                             contentDescription = null,
-                            tint = GymOrange,
-                            modifier = Modifier.size(20.dp)
+                            tint = GymInk,
+                            modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = stringResource(R.string.backup_export_title),
-                            style = MaterialTheme.typography.titleSmall.copy(color = GymTextPrimary)
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = GymInk,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
 
@@ -413,28 +425,34 @@ fun AdminDashboardTab(
         item {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = GymCardBg,
-                border = BorderStroke(1.dp, GymBorder)
+                shape = RoundedCornerShape(20.dp),
+                color = GymSurface,
+                border = BorderStroke(1.dp, GymLine)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                            .padding(horizontal = 18.dp, vertical = 14.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = stringResource(R.string.today_attendance_title),
-                            style = MaterialTheme.typography.titleMedium.copy(color = GymTextPrimary)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = GymInk,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                         Text(
                             text = todayShort,
-                            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymInkMuted,
+                                letterSpacing = 0.sp
+                            )
                         )
                     }
-                    HorizontalDivider(color = GymBorder)
+                    HorizontalDivider(color = GymLine)
 
                     when (membersState) {
                         is UiState.Loading -> {
@@ -444,7 +462,7 @@ fun AdminDashboardTab(
                                     .padding(32.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(color = GymOrange)
+                                CircularProgressIndicator(color = GymInk)
                             }
                         }
                         is UiState.Error -> {
@@ -465,13 +483,13 @@ fun AdminDashboardTab(
                                     Icon(
                                         imageVector = Icons.Rounded.Group,
                                         contentDescription = null,
-                                        tint = GymTextMuted.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(44.dp)
+                                        tint = GymInkMuted.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(40.dp)
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
                                         text = "Koi member nahi hai. Members tab se add karo.",
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted)
                                     )
                                 }
                             }
@@ -488,14 +506,14 @@ fun AdminDashboardTab(
                 Surface(
                     onClick = { onOpenMemberHistory(member) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = GymCardBg,
-                    border = BorderStroke(1.dp, GymBorder)
+                    shape = RoundedCornerShape(18.dp),
+                    color = GymSurface,
+                    border = BorderStroke(1.dp, GymLine)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         MemberAvatarBadge(memberId = member.id, name = member.name)
@@ -504,7 +522,7 @@ fun AdminDashboardTab(
                             Text(
                                 text = member.name,
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    color = GymTextPrimary,
+                                    color = GymInk,
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 maxLines = 1,
@@ -512,14 +530,14 @@ fun AdminDashboardTab(
                             )
                             Text(
                                 text = member.phone,
-                                style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                style = MaterialTheme.typography.bodySmall.copy(color = GymInkSecondary)
                             )
                         }
                         Icon(
                             imageVector = if (isPresent) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked,
                             contentDescription = if (isPresent) "Present" else "Absent",
-                            tint = if (isPresent) GymGreen else GymTextMuted.copy(alpha = 0.5f),
-                            modifier = Modifier.size(24.dp)
+                            tint = if (isPresent) GymGreen else GymInkMuted.copy(alpha = 0.5f),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -541,17 +559,20 @@ private fun ExportActionButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.minimumInteractiveComponentSize(),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, GymBorder),
+        shape = CircleShape,
+        border = BorderStroke(1.dp, GymLine),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = GymElevated,
-            contentColor = GymTextPrimary
+            containerColor = GymElevated.copy(alpha = 0.55f),
+            contentColor = GymInk
         ),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(
+                letterSpacing = 0.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -570,33 +591,39 @@ private fun DashboardStatCard(
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.25f))
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(18.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = accent,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(22.dp)
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     color = accent,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 28.sp,
+                    letterSpacing = (-0.8).sp
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = label.uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = GymInkMuted,
+                    letterSpacing = 1.sp,
+                    fontSize = 10.sp
+                )
             )
         }
     }
@@ -611,9 +638,9 @@ fun MemberAvatarBadge(
     val initial = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
     Box(
         modifier = Modifier
-            .size(44.dp)
+            .size(42.dp)
             .clip(CircleShape)
-            .background(color.copy(alpha = 0.18f)),
+            .background(color.copy(alpha = 0.12f)),
         contentAlignment = Alignment.Center
     ) {
         Text(

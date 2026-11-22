@@ -8,92 +8,98 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.R
 
-val RajdhaniFontFamily = FontFamily(
-    Font(R.font.rajdhani, FontWeight.Normal),
-    Font(R.font.rajdhani, FontWeight.SemiBold),
-    Font(R.font.rajdhani, FontWeight.Bold)
-)
-
-val PoppinsFontFamily = FontFamily(
-    Font(R.font.poppins, FontWeight.Normal),
-    Font(R.font.poppins, FontWeight.Medium),
-    Font(R.font.poppins, FontWeight.SemiBold),
-    Font(R.font.poppins, FontWeight.Bold)
+val InterFontFamily = FontFamily(
+    Font(R.font.inter, FontWeight.Normal),
+    Font(R.font.inter, FontWeight.Medium),
+    Font(R.font.inter, FontWeight.SemiBold),
+    Font(R.font.inter, FontWeight.Bold),
+    Font(R.font.inter, FontWeight.ExtraBold)
 )
 
 val GymTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = RajdhaniFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 52.sp,
-        lineHeight = 56.sp,
-        letterSpacing = 1.5.sp
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 54.sp,
+        lineHeight = 52.sp,
+        letterSpacing = (-1.8).sp
     ),
     displayMedium = TextStyle(
-        fontFamily = RajdhaniFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 40.sp,
-        lineHeight = 44.sp,
-        letterSpacing = 1.5.sp
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 42.sp,
+        lineHeight = 42.sp,
+        letterSpacing = (-1.4).sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = RajdhaniFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 36.sp,
-        letterSpacing = 1.2.sp
+        fontSize = 30.sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.8).sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = RajdhaniFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 1.sp
-    ),
-    titleLarge = TextStyle(
-        fontFamily = RajdhaniFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.5).sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
         lineHeight = 26.sp,
-        letterSpacing = 0.8.sp
+        letterSpacing = (-0.3).sp
     ),
     titleMedium = TextStyle(
-        fontFamily = PoppinsFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
-        lineHeight = 22.sp
+        lineHeight = 22.sp,
+        letterSpacing = (-0.1).sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = PoppinsFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 22.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = PoppinsFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 13.sp,
-        lineHeight = 19.sp
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 18.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Bold,
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
-        lineHeight = 18.sp,
-        letterSpacing = 0.5.sp
+        lineHeight = 18.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = PoppinsFontFamily,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        lineHeight = 16.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Medium,
+        fontFamily = InterFontFamily,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.8.sp
+        letterSpacing = 0.6.sp
     )
 )

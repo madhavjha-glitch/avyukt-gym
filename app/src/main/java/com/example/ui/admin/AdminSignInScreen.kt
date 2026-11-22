@@ -42,25 +42,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import com.example.R
 import com.example.auth.attemptAutoSignIn
 import com.example.auth.onGoogleSignInClicked
-import com.example.ui.theme.GymCardBg
-import com.example.ui.theme.GymObsidian
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymAccent
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 
 @Composable
 fun AdminSignInScreen(
@@ -87,11 +91,7 @@ fun AdminSignInScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF1A0A00), GymObsidian)
-                )
-            )
+            .background(GymPaper)
             .safeDrawingPadding()
     ) {
         IconButton(
@@ -105,7 +105,7 @@ fun AdminSignInScreen(
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(R.string.back_to_gym_home),
-                tint = GymTextPrimary
+                tint = GymInk
             )
         }
 
@@ -115,9 +115,9 @@ fun AdminSignInScreen(
                 .fillMaxWidth()
                 .align(Alignment.Center)
                 .padding(horizontal = 24.dp),
-            shape = RoundedCornerShape(24.dp),
-            color = GymCardBg,
-            border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.3f))
+            shape = RoundedCornerShape(20.dp),
+            color = GymSurface,
+            border = BorderStroke(1.dp, GymLine)
         ) {
             Column(
                 modifier = Modifier.padding(28.dp),
@@ -129,21 +129,35 @@ fun AdminSignInScreen(
                     contentDescription = stringResource(R.string.gym_full_name),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(84.dp)
-                        .clip(CircleShape)
-                        .border(3.dp, GymOrange, CircleShape)
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(1.dp, GymLine, RoundedCornerShape(16.dp))
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
 
                 Text(
-                    text = stringResource(R.string.admin_panel_title).uppercase(),
-                    style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary)
+                    text = buildAnnotatedString {
+                        append("AVYUKT ")
+                        withStyle(SpanStyle(color = GymAccent)) {
+                            append("GYM")
+                        }
+                    },
+                    style = MaterialTheme.typography.headlineLarge.copy(color = GymInk)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = stringResource(R.string.admin_panel_title),
+                    style = MaterialTheme.typography.titleSmall.copy(color = GymInkSecondary)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
                     text = stringResource(R.string.admin_sign_in_prompt),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted),
                     textAlign = TextAlign.Center
                 )
 
@@ -151,12 +165,12 @@ fun AdminSignInScreen(
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = GymRed.copy(alpha = 0.14f),
-                        border = BorderStroke(1.dp, GymRed.copy(alpha = 0.35f))
+                        color = GymRed.copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, GymRed.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = errorMessage ?: "",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = GymRed),
+                            style = MaterialTheme.typography.bodySmall.copy(color = GymRed),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(12.dp)
                         )
@@ -189,36 +203,37 @@ fun AdminSignInScreen(
                     enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(54.dp)
                         .minimumInteractiveComponentSize()
                         .testTag("google_sign_in_button"),
-                    shape = RoundedCornerShape(50),
+                    shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GymOrange,
-                        contentColor = Color.White
+                        containerColor = GymInk,
+                        contentColor = GymPaper
                     ),
                     contentPadding = PaddingValues(vertical = 14.dp, horizontal = 20.dp)
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(22.dp),
-                            color = Color.White,
+                            modifier = Modifier.size(20.dp),
+                            color = GymPaper,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Rounded.LockOpen,
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.sign_in_with_google),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 TextButton(
                     onClick = onBackToHome,
@@ -226,7 +241,7 @@ fun AdminSignInScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.back_to_gym_home),
-                        style = MaterialTheme.typography.labelMedium.copy(color = GymTextMuted)
+                        style = MaterialTheme.typography.labelMedium.copy(color = GymInkMuted)
                     )
                 }
             }

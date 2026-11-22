@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -38,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,12 +47,13 @@ import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.model.GymBatch
 import com.example.data.model.GymMember
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymDarkSurface
-import com.example.ui.theme.GymElevated
-import com.example.ui.theme.GymOrange
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymAccent
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
+import com.example.ui.theme.GymSurface
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -77,11 +78,14 @@ fun MemberFormDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isSaving) onDismiss() },
-        containerColor = GymDarkSurface,
+        containerColor = GymSurface,
         title = {
             Text(
-                text = stringResource(if (isEdit) R.string.edit_member_title else R.string.add_member_title).uppercase(),
-                style = MaterialTheme.typography.titleLarge.copy(color = GymTextPrimary)
+                text = stringResource(if (isEdit) R.string.edit_member_title else R.string.add_member_title),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = GymInk,
+                    fontWeight = FontWeight.Bold
+                )
             )
         },
         text = {
@@ -95,13 +99,14 @@ fun MemberFormDialog(
                     label = { Text(stringResource(R.string.member_name_label)) },
                     placeholder = { Text("Jaise: Rahul Sharma") },
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GymOrange,
-                        unfocusedBorderColor = GymBorder,
-                        focusedTextColor = GymTextPrimary,
-                        unfocusedTextColor = GymTextPrimary,
-                        focusedLabelColor = GymOrange,
-                        unfocusedLabelColor = GymTextMuted
+                        focusedBorderColor = GymInk,
+                        unfocusedBorderColor = GymLine,
+                        focusedTextColor = GymInk,
+                        unfocusedTextColor = GymInk,
+                        focusedLabelColor = GymInk,
+                        unfocusedLabelColor = GymInkMuted
                     )
                 )
 
@@ -116,21 +121,22 @@ fun MemberFormDialog(
                     label = { Text(stringResource(R.string.member_phone_label)) },
                     placeholder = { Text("10 digit number") },
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GymOrange,
-                        unfocusedBorderColor = GymBorder,
-                        focusedTextColor = GymTextPrimary,
-                        unfocusedTextColor = GymTextPrimary,
-                        focusedLabelColor = GymOrange,
-                        unfocusedLabelColor = GymTextMuted
+                        focusedBorderColor = GymInk,
+                        unfocusedBorderColor = GymLine,
+                        focusedTextColor = GymInk,
+                        unfocusedTextColor = GymInk,
+                        focusedLabelColor = GymInk,
+                        unfocusedLabelColor = GymInkMuted
                     )
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = stringResource(R.string.member_batch_label),
-                        style = MaterialTheme.typography.labelMedium.copy(color = GymTextMuted)
+                        style = MaterialTheme.typography.labelMedium.copy(color = GymInkSecondary)
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -144,9 +150,9 @@ fun MemberFormDialog(
                                     .weight(1f)
                                     .minimumInteractiveComponentSize()
                                     .testTag("batch_option_${batch.id.lowercase()}"),
-                                shape = RoundedCornerShape(10.dp),
-                                color = if (selected) GymOrange.copy(alpha = 0.2f) else GymElevated,
-                                border = BorderStroke(1.dp, if (selected) GymOrange else GymBorder)
+                                shape = CircleShape,
+                                color = if (selected) GymInk else GymPaper,
+                                border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
                             ) {
                                 Box(
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 10.dp),
@@ -155,7 +161,7 @@ fun MemberFormDialog(
                                     Text(
                                         text = batch.label,
                                         style = MaterialTheme.typography.labelMedium.copy(
-                                            color = if (selected) GymOrange else GymTextPrimary,
+                                            color = if (selected) GymPaper else GymInk,
                                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                                         ),
                                         maxLines = 1
@@ -171,17 +177,17 @@ fun MemberFormDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .minimumInteractiveComponentSize(),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, GymBorder),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, GymLine),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = GymElevated,
-                        contentColor = GymTextPrimary
+                        containerColor = GymPaper,
+                        contentColor = GymInk
                     )
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.CalendarToday,
                         contentDescription = null,
-                        tint = GymOrange,
+                        tint = GymAccent,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -197,12 +203,16 @@ fun MemberFormDialog(
                 onClick = { onSubmit(name, phone, joinDate, selectedBatch) },
                 enabled = !isSaving && name.isNotBlank() && phone.length >= 10,
                 modifier = Modifier.testTag("submit_add_member_button"),
-                colors = ButtonDefaults.buttonColors(containerColor = GymOrange)
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GymInk,
+                    contentColor = GymPaper
+                )
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        color = Color.White,
+                        color = GymPaper,
                         strokeWidth = 2.dp
                     )
                 } else {
@@ -219,7 +229,7 @@ fun MemberFormDialog(
                 onClick = onDismiss,
                 enabled = !isSaving
             ) {
-                Text("Cancel", color = GymTextMuted)
+                Text("Cancel", color = GymInkMuted)
             }
         }
     )
@@ -240,12 +250,12 @@ fun MemberFormDialog(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK", color = GymOrange)
+                    Text("OK", color = GymAccent, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel", color = GymTextMuted)
+                    Text("Cancel", color = GymInkMuted)
                 }
             }
         ) {

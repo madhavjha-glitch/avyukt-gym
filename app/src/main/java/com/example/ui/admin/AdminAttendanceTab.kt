@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -51,19 +52,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.BatchFilter
 import com.example.data.model.GymBatch
 import com.example.data.model.GymMember
 import com.example.data.model.UiState
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymElevated
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -93,7 +97,7 @@ fun AdminAttendanceTab(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -102,20 +106,13 @@ fun AdminAttendanceTab(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.EventAvailable,
-                        contentDescription = null,
-                        tint = GymOrange
+                Text(
+                    text = "Attendance",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = GymInk,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                    Text(
-                        text = "ATTENDANCE",
-                        style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary)
-                    )
-                }
+                )
 
                 OutlinedButton(
                     onClick = onExportAttendanceCsv,
@@ -123,11 +120,11 @@ fun AdminAttendanceTab(
                     modifier = Modifier
                         .minimumInteractiveComponentSize()
                         .testTag("export_attendance_csv_button"),
-                    shape = RoundedCornerShape(50),
-                    border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.45f)),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, GymLine),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = GymOrange.copy(alpha = 0.12f),
-                        contentColor = GymOrange
+                        containerColor = GymSurface,
+                        contentColor = GymInk
                     )
                 ) {
                     Icon(
@@ -153,21 +150,21 @@ fun AdminAttendanceTab(
                 OutlinedButton(
                     onClick = { showDatePicker = true },
                     modifier = Modifier
-                        .weight(1.3f)
+                        .weight(1.25f)
                         .minimumInteractiveComponentSize()
                         .testTag("att_date_picker_button"),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, GymBorder),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, GymLine),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = GymElevated,
-                        contentColor = GymTextPrimary
+                        containerColor = GymSurface,
+                        contentColor = GymInk
                     ),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.CalendarMonth,
                         contentDescription = null,
-                        tint = GymOrange,
+                        tint = GymAccent,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -185,8 +182,11 @@ fun AdminAttendanceTab(
                         .weight(1f)
                         .minimumInteractiveComponentSize()
                         .testTag("mark_all_present_button"),
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(containerColor = GymOrange),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymInk,
+                        contentColor = GymPaper
+                    ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
                 ) {
                     Icon(
@@ -197,7 +197,10 @@ fun AdminAttendanceTab(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = stringResource(R.string.all_present),
-                        style = MaterialTheme.typography.labelSmall.copy(color = Color.White),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = GymPaper,
+                            letterSpacing = 0.sp
+                        ),
                         maxLines = 1
                     )
                 }
@@ -209,11 +212,11 @@ fun AdminAttendanceTab(
                         .weight(1f)
                         .minimumInteractiveComponentSize()
                         .testTag("mark_all_absent_button"),
-                    shape = RoundedCornerShape(50),
-                    border = BorderStroke(1.dp, GymBorder),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, GymLine),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = GymElevated,
-                        contentColor = GymTextMuted
+                        containerColor = GymSurface,
+                        contentColor = GymInkSecondary
                     ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
                 ) {
@@ -225,7 +228,7 @@ fun AdminAttendanceTab(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = stringResource(R.string.all_absent),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
                         maxLines = 1
                     )
                 }
@@ -246,9 +249,9 @@ fun AdminAttendanceTab(
                             .weight(1f)
                             .minimumInteractiveComponentSize()
                             .testTag("att_batch_filter_${filter.name.lowercase()}"),
-                        shape = RoundedCornerShape(50),
-                        color = if (selected) GymOrange.copy(alpha = 0.2f) else GymCardBg,
-                        border = BorderStroke(1.dp, if (selected) GymOrange else GymBorder)
+                        shape = CircleShape,
+                        color = if (selected) GymInk else GymSurface,
+                        border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
                     ) {
                         Box(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
@@ -257,8 +260,9 @@ fun AdminAttendanceTab(
                             Text(
                                 text = "${filter.label} ($count)",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = if (selected) GymOrange else GymTextMuted,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                    color = if (selected) GymPaper else GymInkSecondary,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    letterSpacing = 0.sp
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -290,7 +294,7 @@ fun AdminAttendanceTab(
                     modifier = Modifier.weight(1f),
                     count = filteredMembers.size,
                     label = stringResource(R.string.total_label),
-                    accent = GymOrange
+                    accent = GymAccent
                 )
             }
         }
@@ -304,7 +308,7 @@ fun AdminAttendanceTab(
                             .padding(40.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = GymOrange)
+                        CircularProgressIndicator(color = GymInk)
                     }
                 }
             }
@@ -322,9 +326,9 @@ fun AdminAttendanceTab(
                     item {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(1.dp, GymBorder)
+                            shape = RoundedCornerShape(20.dp),
+                            color = GymSurface,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -335,8 +339,8 @@ fun AdminAttendanceTab(
                                 Icon(
                                     imageVector = Icons.Rounded.EventAvailable,
                                     contentDescription = null,
-                                    tint = GymTextMuted.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(44.dp)
+                                    tint = GymInkMuted.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(40.dp)
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
@@ -345,7 +349,7 @@ fun AdminAttendanceTab(
                                     } else {
                                         "Is batch filter me koi member nahi hai."
                                     },
-                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted)
                                 )
                             }
                         }
@@ -357,9 +361,9 @@ fun AdminAttendanceTab(
                         Surface(
                             onClick = { onOpenMemberHistory(member) },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(1.dp, GymBorder)
+                            shape = RoundedCornerShape(18.dp),
+                            color = GymSurface,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -373,18 +377,22 @@ fun AdminAttendanceTab(
                                     Text(
                                         text = member.name,
                                         style = MaterialTheme.typography.titleMedium.copy(
-                                            color = GymTextPrimary
+                                            color = GymInk,
+                                            fontWeight = FontWeight.SemiBold
                                         ),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "${member.phone} • ${GymBatch.fromId(member.batch).label}",
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                        style = MaterialTheme.typography.bodySmall.copy(color = GymInkSecondary)
                                     )
                                     Text(
                                         text = "Is mahine: $monthCount din aaye",
-                                        style = MaterialTheme.typography.labelSmall.copy(color = GymOrange)
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = GymAccent,
+                                            letterSpacing = 0.sp
+                                        )
                                     )
                                 }
 
@@ -396,8 +404,8 @@ fun AdminAttendanceTab(
                                         checkedThumbColor = Color.White,
                                         checkedTrackColor = GymGreen,
                                         uncheckedThumbColor = Color.White,
-                                        uncheckedTrackColor = Color.White.copy(alpha = 0.16f),
-                                        uncheckedBorderColor = Color.Transparent
+                                        uncheckedTrackColor = GymElevated,
+                                        uncheckedBorderColor = GymLine
                                     )
                                 )
                             }
@@ -427,12 +435,12 @@ fun AdminAttendanceTab(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK", color = GymOrange)
+                    Text("OK", color = GymAccent, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel", color = GymTextMuted)
+                    Text("Cancel", color = GymInkMuted)
                 }
             }
         ) {
@@ -450,24 +458,28 @@ private fun AttCountCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        color = accent.copy(alpha = 0.1f),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.25f))
+        shape = RoundedCornerShape(18.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+            modifier = Modifier.padding(vertical = 14.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = count.toString(),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     color = accent,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
             )
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(color = accent)
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = GymInkMuted,
+                    letterSpacing = 0.8.sp,
+                    fontSize = 10.sp
+                )
             )
         }
     }

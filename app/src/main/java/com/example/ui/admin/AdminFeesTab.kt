@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
@@ -55,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.FeeFilter
 import com.example.data.model.FeeStatus
@@ -62,15 +64,15 @@ import com.example.data.model.GymBatch
 import com.example.data.model.GymConstants
 import com.example.data.model.GymMember
 import com.example.data.model.UiState
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
-import com.example.ui.theme.GymDarkSurface
-import com.example.ui.theme.GymElevated
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -114,7 +116,7 @@ fun AdminFeesTab(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -123,20 +125,13 @@ fun AdminFeesTab(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.CurrencyRupee,
-                        contentDescription = null,
-                        tint = GymOrange
+                Text(
+                    text = "Fees",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = GymInk,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                    Text(
-                        text = "FEES",
-                        style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary)
-                    )
-                }
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -152,7 +147,7 @@ fun AdminFeesTab(
                         Icon(
                             imageVector = Icons.Rounded.Download,
                             contentDescription = stringResource(R.string.export_fees_csv),
-                            tint = GymOrange
+                            tint = GymInk
                         )
                     }
 
@@ -168,10 +163,10 @@ fun AdminFeesTab(
                         modifier = Modifier
                             .minimumInteractiveComponentSize()
                             .testTag("fees_whatsapp_report_button"),
-                        shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.4f)),
+                        shape = CircleShape,
+                        border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.38f)),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = GymGreen.copy(alpha = 0.12f),
+                            containerColor = GymGreen.copy(alpha = 0.1f),
                             contentColor = GymGreen
                         )
                     ) {
@@ -193,9 +188,9 @@ fun AdminFeesTab(
         item {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = GymElevated,
-                border = BorderStroke(1.dp, GymBorder)
+                shape = RoundedCornerShape(16.dp),
+                color = GymSurface,
+                border = BorderStroke(1.dp, GymLine)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -211,12 +206,15 @@ fun AdminFeesTab(
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
                             contentDescription = "Previous month",
-                            tint = GymTextPrimary
+                            tint = GymInk
                         )
                     }
                     Text(
                         text = AdminViewModel.formatMonthLabel(selectedMonth),
-                        style = MaterialTheme.typography.titleMedium.copy(color = GymTextPrimary)
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = GymInk,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
                     IconButton(
                         onClick = { onShiftMonth(1) },
@@ -227,7 +225,7 @@ fun AdminFeesTab(
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                             contentDescription = "Next month",
-                            tint = GymTextPrimary
+                            tint = GymInk
                         )
                     }
                 }
@@ -277,7 +275,6 @@ fun AdminFeesTab(
                         .testTag("fees_filter_all"),
                     label = "${stringResource(R.string.fees_filter_all)} (${members.size})",
                     selected = selectedFilter == FeeFilter.ALL,
-                    accent = GymOrange,
                     onClick = { onSelectFilter(FeeFilter.ALL) }
                 )
                 FeeFilterChip(
@@ -286,7 +283,6 @@ fun AdminFeesTab(
                         .testTag("fees_filter_pending"),
                     label = "${stringResource(R.string.fees_filter_pending)} ($pendingCount)",
                     selected = selectedFilter == FeeFilter.PENDING,
-                    accent = GymRed,
                     onClick = { onSelectFilter(FeeFilter.PENDING) }
                 )
                 FeeFilterChip(
@@ -295,7 +291,6 @@ fun AdminFeesTab(
                         .testTag("fees_filter_paid"),
                     label = "${stringResource(R.string.fees_filter_paid)} ($paidCount)",
                     selected = selectedFilter == FeeFilter.PAID,
-                    accent = GymGreen,
                     onClick = { onSelectFilter(FeeFilter.PAID) }
                 )
             }
@@ -305,9 +300,9 @@ fun AdminFeesTab(
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = GymRed.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, GymRed.copy(alpha = 0.35f))
+                    shape = RoundedCornerShape(16.dp),
+                    color = GymRed.copy(alpha = 0.08f),
+                    border = BorderStroke(1.dp, GymRed.copy(alpha = 0.28f))
                 ) {
                     Row(
                         modifier = Modifier
@@ -332,7 +327,7 @@ fun AdminFeesTab(
                         ) {
                             Text(
                                 text = stringResource(R.string.retry_label),
-                                color = GymOrange,
+                                color = GymAccent,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -351,11 +346,14 @@ fun AdminFeesTab(
             ) {
                 Text(
                     text = stringResource(R.string.fees_rate_header),
-                    style = MaterialTheme.typography.labelLarge.copy(color = GymTextPrimary)
+                    style = MaterialTheme.typography.labelLarge.copy(color = GymInk)
                 )
                 Text(
                     text = stringResource(R.string.fees_tap_hint),
-                    style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        letterSpacing = 0.sp
+                    )
                 )
             }
         }
@@ -369,7 +367,7 @@ fun AdminFeesTab(
                             .padding(40.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = GymOrange)
+                        CircularProgressIndicator(color = GymInk)
                     }
                 }
             }
@@ -409,12 +407,9 @@ fun AdminFeesTab(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("fee_card_${member.id}"),
-                            shape = RoundedCornerShape(16.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(
-                                1.dp,
-                                if (isPaid) GymGreen.copy(alpha = 0.28f) else GymBorder
-                            )
+                            shape = RoundedCornerShape(18.dp),
+                            color = GymSurface,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -428,26 +423,33 @@ fun AdminFeesTab(
                                     Text(
                                         text = member.name,
                                         style = MaterialTheme.typography.titleMedium.copy(
-                                            color = GymTextPrimary
+                                            color = GymInk,
+                                            fontWeight = FontWeight.SemiBold
                                         ),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "${member.phone} • $batchLabel",
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted),
+                                        style = MaterialTheme.typography.bodySmall.copy(color = GymInkSecondary),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     if (isPaid && !feeStatus?.paidDate.isNullOrBlank()) {
                                         Text(
                                             text = "Paid on: ${AdminViewModel.formatDisplayDate(feeStatus!!.paidDate!!)}",
-                                            style = MaterialTheme.typography.labelSmall.copy(color = GymGreen)
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                color = GymGreen,
+                                                letterSpacing = 0.sp
+                                            )
                                         )
                                     } else if (!isPaid) {
                                         Text(
                                             text = "₹${GymConstants.FEES_AMOUNT} baaki hai",
-                                            style = MaterialTheme.typography.labelSmall.copy(color = GymRed)
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                color = GymRed,
+                                                letterSpacing = 0.sp
+                                            )
                                         )
                                     }
                                 }
@@ -475,10 +477,10 @@ fun AdminFeesTab(
                                     modifier = Modifier
                                         .minimumInteractiveComponentSize()
                                         .testTag("fee_toggle_${member.id}"),
-                                    shape = RoundedCornerShape(50),
-                                    border = BorderStroke(1.dp, badgeAccent.copy(alpha = 0.45f)),
+                                    shape = CircleShape,
+                                    border = BorderStroke(1.dp, badgeAccent.copy(alpha = 0.35f)),
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = badgeAccent.copy(alpha = 0.14f),
+                                        containerColor = badgeAccent.copy(alpha = 0.1f),
                                         contentColor = badgeAccent
                                     ),
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -520,17 +522,17 @@ fun AdminFeesTab(
 
         AlertDialog(
             onDismissRequest = { selectedMemberForDialog = null },
-            containerColor = GymDarkSurface,
+            containerColor = GymSurface,
             title = {
                 Column {
                     Text(
                         text = dialogMember.name,
-                        color = GymTextPrimary,
+                        color = GymInk,
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
                         text = "${AdminViewModel.formatMonthLabel(selectedMonth)} • ₹${GymConstants.FEES_AMOUNT}",
-                        color = GymTextMuted,
+                        color = GymInkSecondary,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -539,9 +541,9 @@ fun AdminFeesTab(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = (if (isPaid) GymGreen else GymRed).copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, (if (isPaid) GymGreen else GymRed).copy(alpha = 0.3f))
+                        shape = RoundedCornerShape(14.dp),
+                        color = (if (isPaid) GymGreen else GymRed).copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, (if (isPaid) GymGreen else GymRed).copy(alpha = 0.28f))
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),
@@ -562,8 +564,8 @@ fun AdminFeesTab(
                                 if (isPaid && !currentStatus?.paidDate.isNullOrBlank()) {
                                     Text(
                                         text = "Paid on: ${AdminViewModel.formatDisplayDate(currentStatus!!.paidDate!!)}",
-                                        color = GymTextMuted,
-                                        style = MaterialTheme.typography.labelSmall
+                                        color = GymInkMuted,
+                                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp)
                                     )
                                 }
                             }
@@ -584,7 +586,7 @@ fun AdminFeesTab(
                             containerColor = GymGreen,
                             contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = CircleShape
                     ) {
                         Text(stringResource(R.string.fees_mark_paid))
                     }
@@ -599,9 +601,9 @@ fun AdminFeesTab(
                             .fillMaxWidth()
                             .minimumInteractiveComponentSize()
                             .testTag("dialog_mark_pending_${dialogMember.id}"),
-                        border = BorderStroke(1.dp, GymRed.copy(alpha = 0.4f)),
+                        border = BorderStroke(1.dp, GymRed.copy(alpha = 0.35f)),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = GymRed),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = CircleShape
                     ) {
                         Text(stringResource(R.string.fees_mark_pending))
                     }
@@ -618,12 +620,12 @@ fun AdminFeesTab(
                                 .fillMaxWidth()
                                 .minimumInteractiveComponentSize()
                                 .testTag("dialog_share_receipt_${dialogMember.id}"),
-                            border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.45f)),
+                            border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.4f)),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = GymGreen.copy(alpha = 0.12f),
+                                containerColor = GymGreen.copy(alpha = 0.08f),
                                 contentColor = GymGreen
                             ),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = CircleShape
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.ReceiptLong,
@@ -648,9 +650,9 @@ fun AdminFeesTab(
                                 .fillMaxWidth()
                                 .minimumInteractiveComponentSize()
                                 .testTag("dialog_whatsapp_reminder_${dialogMember.id}"),
-                            border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.4f)),
+                            border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.38f)),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = GymGreen),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = CircleShape
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Share,
@@ -672,9 +674,9 @@ fun AdminFeesTab(
                             .fillMaxWidth()
                             .minimumInteractiveComponentSize()
                             .testTag("dialog_view_history_${dialogMember.id}"),
-                        border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.4f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GymOrange),
-                        shape = RoundedCornerShape(12.dp)
+                        border = BorderStroke(1.dp, GymLine),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GymInk),
+                        shape = CircleShape
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.History,
@@ -688,7 +690,7 @@ fun AdminFeesTab(
             },
             confirmButton = {
                 TextButton(onClick = { selectedMemberForDialog = null }) {
-                    Text("Close", color = GymTextMuted)
+                    Text("Close", color = GymInkMuted)
                 }
             }
         )
@@ -707,27 +709,29 @@ private fun FeeSummaryCard(
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        color = accent.copy(alpha = if (selected) 0.18f else 0.10f),
-        border = BorderStroke(if (selected) 2.dp else 1.dp, accent.copy(alpha = if (selected) 0.75f else 0.25f))
+        shape = RoundedCornerShape(18.dp),
+        color = GymSurface,
+        border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) accent else GymLine)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = amountText,
                 style = MaterialTheme.typography.headlineMedium.copy(
                     color = accent,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = subtitle.uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = if (selected) accent else GymTextMuted,
-                    fontWeight = FontWeight.SemiBold
+                    color = if (selected) accent else GymInkMuted,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.8.sp,
+                    fontSize = 10.sp
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -741,15 +745,14 @@ private fun FeeFilterChip(
     modifier: Modifier = Modifier,
     label: String,
     selected: Boolean,
-    accent: Color,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
         modifier = modifier.minimumInteractiveComponentSize(),
-        shape = RoundedCornerShape(50),
-        color = if (selected) accent.copy(alpha = 0.20f) else GymCardBg,
-        border = BorderStroke(1.dp, if (selected) accent else GymBorder)
+        shape = CircleShape,
+        color = if (selected) GymInk else GymSurface,
+        border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
@@ -758,8 +761,9 @@ private fun FeeFilterChip(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = if (selected) accent else GymTextMuted,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                    color = if (selected) GymPaper else GymInkSecondary,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    letterSpacing = 0.sp
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -772,9 +776,9 @@ private fun FeeFilterChip(
 private fun FeesEmptyCard(message: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, GymBorder)
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Column(
             modifier = Modifier
@@ -785,13 +789,13 @@ private fun FeesEmptyCard(message: String) {
             Icon(
                 imageVector = Icons.Rounded.CurrencyRupee,
                 contentDescription = null,
-                tint = GymTextMuted.copy(alpha = 0.5f),
-                modifier = Modifier.size(44.dp)
+                tint = GymInkMuted.copy(alpha = 0.5f),
+                modifier = Modifier.size(40.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted)
             )
         }
     }

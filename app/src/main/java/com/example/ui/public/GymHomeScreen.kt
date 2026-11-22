@@ -3,15 +3,7 @@ package com.example.ui.public
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,8 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,26 +28,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Chat
-import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.Call
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.CurrencyRupee
-import androidx.compose.material.icons.rounded.FitnessCenter
-import androidx.compose.material.icons.rounded.NightsStay
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,33 +47,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.GymConstants
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymAmber
-import com.example.ui.theme.GymCardBg
-import com.example.ui.theme.GymGold
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymGreenDark
-import com.example.ui.theme.GymObsidian
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
-import com.example.ui.theme.RajdhaniFontFamily
+import com.example.ui.theme.GymSurface
+import com.example.ui.theme.InterFontFamily
 import kotlinx.coroutines.delay
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -102,7 +80,7 @@ import java.time.format.DateTimeFormatter
 
 private data class GymLiveStatus(
     val label: String,
-    val accentColor: Color,
+    val dotColor: Color,
     val isOpen: Boolean
 )
 
@@ -121,16 +99,15 @@ fun GymHomeScreen(
     }
 
     val liveTimeText = remember(now) {
-        now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+        now.format(DateTimeFormatter.ofPattern("hh:mm a"))
     }
-    val statusChecking = stringResource(R.string.status_checking)
     val statusSundayOff = stringResource(R.string.status_sunday_off)
     val statusOpenNow = stringResource(R.string.status_open_now)
     val statusOpens5Am = stringResource(R.string.status_opens_5am)
     val statusReopens5Pm = stringResource(R.string.status_reopens_5pm)
     val statusClosed = stringResource(R.string.status_closed)
 
-    val liveStatus = remember(now, statusChecking, statusSundayOff, statusOpenNow, statusOpens5Am, statusReopens5Pm, statusClosed) {
+    val liveStatus = remember(now, statusSundayOff, statusOpenNow, statusOpens5Am, statusReopens5Pm, statusClosed) {
         val h = now.hour
         val day = now.dayOfWeek
         val isMorning = h in 5 until 10
@@ -145,7 +122,7 @@ fun GymHomeScreen(
     }
 
     Scaffold(
-        containerColor = GymObsidian,
+        containerColor = GymPaper,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         Column(
@@ -155,528 +132,481 @@ fun GymHomeScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HeroSection(
-                liveStatus = liveStatus,
-                liveTimeText = liveTimeText
+            EditorialTopBar(
+                onWhatsAppClick = { openWhatsAppJoin(context) }
             )
 
             Column(
                 modifier = Modifier
-                    .widthIn(max = 600.dp)
+                    .widthIn(max = 640.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 22.dp)
+                    .navigationBarsPadding()
             ) {
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(36.dp))
 
-                SectionHeader(
-                    icon = Icons.Rounded.AccessTime,
-                    title = stringResource(R.string.section_gym_timing)
+                EditorialEyebrow(text = stringResource(R.string.hero_badge_fitness_first))
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    text = "AVYUKT",
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontSize = 62.sp,
+                        lineHeight = 56.sp,
+                        letterSpacing = (-2.4).sp,
+                        color = GymInk
+                    )
+                )
+                Text(
+                    text = "GYM",
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontSize = 62.sp,
+                        lineHeight = 56.sp,
+                        letterSpacing = (-2.4).sp,
+                        color = GymAccent
+                    )
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    text = stringResource(R.string.hero_tagline),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = GymInkSecondary,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 17.sp
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+                HorizontalDivider(color = GymLine)
+                Spacer(modifier = Modifier.height(18.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TimingCard(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Rounded.WbSunny,
-                        iconTint = GymAmber,
-                        sessionLabel = stringResource(R.string.morning_label),
-                        startTime = stringResource(R.string.morning_start),
-                        endTime = stringResource(R.string.morning_end)
-                    )
-                    TimingCard(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Rounded.NightsStay,
-                        iconTint = GymOrange,
-                        sessionLabel = stringResource(R.string.evening_label),
-                        startTime = stringResource(R.string.evening_start),
-                        endTime = stringResource(R.string.evening_end)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .background(liveStatus.dotColor.copy(alpha = 0.16f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(9.dp)
+                                    .background(liveStatus.dotColor, CircleShape)
+                            )
+                        }
+                        Text(
+                            text = liveStatus.label,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = GymInk,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            modifier = Modifier.testTag("gym_live_status")
+                        )
+                    }
+
+                    Text(
+                        text = "$liveTimeText IST",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = GymInkMuted,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.testTag("gym_live_clock")
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                WeeklyDaysCard()
-
                 Spacer(modifier = Modifier.height(32.dp))
 
-                SectionHeader(
-                    icon = Icons.Rounded.CurrencyRupee,
-                    title = stringResource(R.string.section_membership_fees)
-                )
+                EditorialStatsCard()
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                EditorialEyebrow(text = stringResource(R.string.section_gym_timing).uppercase())
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                EditorialTimingCard()
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                MembershipFeesCard()
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                SectionHeader(
-                    icon = Icons.AutoMirrored.Rounded.Chat,
-                    title = stringResource(R.string.section_join_now)
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = GymInk, fontWeight = FontWeight.SemiBold)) {
+                            append("Mon Tue Wed Thu Fri Sat")
+                        }
+                        withStyle(SpanStyle(color = GymInkSecondary)) {
+                            append("  ·  Sun Off")
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(48.dp))
 
-                WhatsAppJoinCard(
-                    onWhatsAppClick = { openWhatsAppJoin(context) },
-                    onCallClick = { openPhoneDialer(context) }
+                EditorialEyebrow(text = stringResource(R.string.section_membership_fees).uppercase())
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                EditorialMembershipCard()
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                EditorialEyebrow(text = stringResource(R.string.section_join_now).uppercase())
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(R.string.whatsapp_join_title),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontSize = 30.sp,
+                        lineHeight = 34.sp,
+                        color = GymInk
+                    )
                 )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = stringResource(R.string.whatsapp_join_subtitle),
+                    style = MaterialTheme.typography.bodyLarge.copy(color = GymInkSecondary)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { openWhatsAppJoin(context) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .minimumInteractiveComponentSize()
+                        .testTag("whatsapp_join_button"),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymInk,
+                        contentColor = GymPaper
+                    ),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.whatsapp_btn_strong),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = { openPhoneDialer(context) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .minimumInteractiveComponentSize()
+                        .testTag("call_gym_button"),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, GymInk),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = GymInk
+                    ),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = "Call: ${stringResource(R.string.owner_phone_display)}",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(52.dp))
+                HorizontalDivider(color = GymLine)
+                Spacer(modifier = Modifier.height(22.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(color = GymInk, fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.gym_full_name))
+                            }
+                            withStyle(SpanStyle(color = GymInkMuted)) {
+                                append(" · ${stringResource(R.string.footer_schedule)}")
+                            }
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Text(
+                        text = "${stringResource(R.string.owner_admin_panel)} · Login",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = GymInkSecondary,
+                            fontWeight = FontWeight.SemiBold,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onOpenAdminPanel)
+                            .minimumInteractiveComponentSize()
+                            .padding(vertical = 8.dp, horizontal = 2.dp)
+                            .testTag("owner_admin_button")
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(28.dp))
-
-                FooterSection(onOpenAdminPanel = onOpenAdminPanel)
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
 }
 
 @Composable
-private fun HeroSection(
-    liveStatus: GymLiveStatus,
-    liveTimeText: String
+private fun EditorialTopBar(
+    onWhatsAppClick: () -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "hero_effects")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 0.75f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "logo_glow"
-    )
-    val particleProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(9000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "particles"
-    )
-
-    val particleSeeds = remember {
-        listOf(
-            0.12f to 0.2f, 0.25f to 0.7f, 0.38f to 0.4f, 0.52f to 0.85f,
-            0.66f to 0.3f, 0.78f to 0.65f, 0.89f to 0.15f, 0.45f to 0.55f,
-            0.18f to 0.9f, 0.73f to 0.45f
-        )
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(GymObsidian),
-        contentAlignment = Alignment.Center
+    Surface(
+        color = GymPaper,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.gym_hero_bg),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            alpha = 0.32f,
-            modifier = Modifier.matchParentSize()
-        )
-
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            GymObsidian.copy(alpha = 0.45f),
-                            GymOrange.copy(alpha = 0.08f),
-                            GymObsidian
-                        )
-                    )
-                )
-        )
-
-        Canvas(modifier = Modifier.matchParentSize()) {
-            particleSeeds.forEachIndexed { index, (xFrac, phase) ->
-                val yFrac = ((1f - particleProgress + phase) % 1f)
-                val radius = if (index % 2 == 0) 3.5f else 2.2f
-                drawCircle(
-                    color = GymOrange.copy(alpha = 0.45f * (1f - yFrac).coerceIn(0.15f, 0.7f)),
-                    radius = radius,
-                    center = Offset(x = size.width * xFrac, y = size.height * yFrac)
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .widthIn(max = 600.dp)
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(116.dp)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                GymOrange.copy(alpha = glowAlpha),
-                                Color.Transparent
-                            )
-                        ),
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.gym_logo),
-                    contentDescription = stringResource(R.string.gym_full_name),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(CircleShape)
-                        .border(3.dp, GymOrange, CircleShape)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .background(
-                        brush = Brush.linearGradient(listOf(GymOrange, GymRed)),
-                        shape = RoundedCornerShape(50)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.FitnessCenter,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.hero_badge_fitness_first),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
-                            color = Color.White
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "AVYUKT",
-                style = MaterialTheme.typography.displayMedium.copy(
-                    color = GymTextPrimary,
-                    letterSpacing = 2.sp
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                text = "GYM",
-                style = TextStyle(
-                    fontFamily = RajdhaniFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 44.sp,
-                    letterSpacing = 3.sp,
-                    brush = Brush.linearGradient(listOf(GymOrange, GymAmber))
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stringResource(R.string.hero_tagline),
-                style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = liveStatus.accentColor.copy(alpha = 0.14f),
-                border = BorderStroke(1.dp, liveStatus.accentColor.copy(alpha = 0.4f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(9.dp)
-                            .clip(CircleShape)
-                            .background(liveStatus.accentColor)
-                    )
-                    Text(
-                        text = liveStatus.label,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = liveStatus.accentColor,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        modifier = Modifier.testTag("gym_live_status")
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = liveTimeText,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontFamily = RajdhaniFontFamily,
-                    letterSpacing = 3.sp,
-                    color = GymTextPrimary.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier.testTag("gym_live_clock")
-            )
-
-            Spacer(modifier = Modifier.height(26.dp))
-
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
+                    .statusBarsPadding()
+                    .widthIn(max = 640.dp)
                     .fillMaxWidth()
-                    .background(
-                        color = GymCardBg.copy(alpha = 0.72f),
-                        shape = RoundedCornerShape(18.dp)
-                    )
-                    .border(1.dp, GymOrange.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
-                    .padding(vertical = 16.dp, horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 22.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                HeroStatItem(
-                    modifier = Modifier.weight(1f),
-                    value = "₹${GymConstants.FEES_AMOUNT}",
-                    label = stringResource(R.string.stat_per_month)
-                )
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(34.dp)
-                        .background(Color.White.copy(alpha = 0.15f))
-                )
-                HeroStatItem(
-                    modifier = Modifier.weight(1f),
-                    value = "6",
-                    label = stringResource(R.string.stat_days_week)
-                )
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(34.dp)
-                        .background(Color.White.copy(alpha = 0.15f))
-                )
-                HeroStatItem(
-                    modifier = Modifier.weight(1f),
-                    value = "10h",
-                    label = stringResource(R.string.stat_daily_hrs)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.gym_logo),
+                        contentDescription = stringResource(R.string.gym_full_name),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                    )
+                    Text(
+                        text = "AVYUKT GYM",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.8.sp,
+                            color = GymInk
+                        )
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onWhatsAppClick,
+                    modifier = Modifier.minimumInteractiveComponentSize(),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, GymInk),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = GymInk
+                    ),
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "WhatsApp",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        )
+                    )
+                }
             }
+            HorizontalDivider(color = GymLine)
         }
     }
 }
 
 @Composable
-private fun HeroStatItem(
-    modifier: Modifier = Modifier,
-    value: String,
-    label: String
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = GymOrange,
-                fontWeight = FontWeight.Bold
-            )
-        )
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted)
-        )
-    }
-}
-
-@Composable
-private fun SectionHeader(
-    icon: ImageVector,
-    title: String
-) {
+private fun EditorialEyebrow(text: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .background(
-                    brush = Brush.linearGradient(listOf(GymOrange, GymRed)),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(22.dp)
-            )
-        }
+                .width(26.dp)
+                .height(1.dp)
+                .background(GymInkSecondary)
+        )
         Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                color = GymTextPrimary,
-                letterSpacing = 1.2.sp
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = GymInkSecondary,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 2.2.sp,
+                fontSize = 11.sp
             )
         )
     }
 }
 
 @Composable
-private fun TimingCard(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    iconTint: Color,
-    sessionLabel: String,
-    startTime: String,
-    endTime: String
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.22f))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 22.dp, horizontal = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = sessionLabel,
-                tint = iconTint,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = sessionLabel.uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = GymOrange,
-                    letterSpacing = 2.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = startTime,
-                style = MaterialTheme.typography.titleLarge.copy(color = GymTextPrimary)
-            )
-            Text(
-                text = stringResource(R.string.to_label),
-                style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted, fontSize = 11.sp),
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
-            Text(
-                text = endTime,
-                style = MaterialTheme.typography.titleLarge.copy(color = GymTextPrimary)
-            )
-        }
-    }
-}
-
-@Composable
-private fun WeeklyDaysCard() {
-    val openDays = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+private fun EditorialStatsCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.22f))
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            openDays.forEach { day ->
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                        .background(
-                            brush = Brush.linearGradient(listOf(GymOrange, Color(0xFFFF4500))),
-                            shape = RoundedCornerShape(10.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = day.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp)
-                    .background(
-                        color = Color.White.copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "SUN",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = GymTextMuted,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp
-                        )
-                    )
-                    Text(
-                        text = stringResource(R.string.sunday_off_tag),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = GymRed,
-                            fontSize = 9.sp
-                        )
-                    )
-                }
-            }
+            EditorialStatCell(
+                modifier = Modifier.weight(1f),
+                value = "₹${GymConstants.FEES_AMOUNT}",
+                label = stringResource(R.string.stat_per_month)
+            )
+            VerticalDivider(
+                modifier = Modifier.height(74.dp),
+                color = GymLine
+            )
+            EditorialStatCell(
+                modifier = Modifier.weight(1f),
+                value = "6",
+                label = stringResource(R.string.stat_days_week)
+            )
+            VerticalDivider(
+                modifier = Modifier.height(74.dp),
+                color = GymLine
+            )
+            EditorialStatCell(
+                modifier = Modifier.weight(1f),
+                value = "10h",
+                label = stringResource(R.string.stat_daily_hrs)
+            )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MembershipFeesCard() {
+private fun EditorialStatCell(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String
+) {
+    Column(
+        modifier = modifier.padding(vertical = 22.dp, horizontal = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontFamily = InterFontFamily,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 28.sp,
+                letterSpacing = (-1).sp,
+                color = GymInk
+            )
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = GymInkMuted,
+                letterSpacing = 1.2.sp,
+                fontSize = 10.sp
+            )
+        )
+    }
+}
+
+@Composable
+private fun EditorialTimingCard() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            EditorialTimingRow(
+                label = stringResource(R.string.morning_label),
+                start = stringResource(R.string.morning_start),
+                end = stringResource(R.string.morning_end)
+            )
+            HorizontalDivider(color = GymLine)
+            EditorialTimingRow(
+                label = stringResource(R.string.evening_label),
+                start = stringResource(R.string.evening_start),
+                end = stringResource(R.string.evening_end)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditorialTimingRow(
+    label: String,
+    start: String,
+    end: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 22.dp)
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = GymInkMuted,
+                letterSpacing = 1.8.sp,
+                fontSize = 11.sp
+            )
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(color = GymInk, fontWeight = FontWeight.Bold)) {
+                    append(start)
+                }
+                withStyle(
+                    SpanStyle(
+                        color = GymInkMuted,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    )
+                ) {
+                    append("  ${stringResource(R.string.to_label)}  ")
+                }
+                withStyle(SpanStyle(color = GymInk, fontWeight = FontWeight.Bold)) {
+                    append(end)
+                }
+            },
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = 23.sp,
+                letterSpacing = (-0.5).sp
+            )
+        )
+    }
+}
+
+@Composable
+private fun EditorialMembershipCard() {
     val perks = listOf(
         "Morning Batch",
         "Evening Batch",
@@ -686,267 +616,103 @@ private fun MembershipFeesCard() {
     )
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = GymCardBg,
-        border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.32f))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(GymOrange.copy(alpha = 0.14f), Color.Transparent)
-                    )
-                )
-                .padding(horizontal = 20.dp, vertical = 26.dp)
-        ) {
-            Surface(
-                modifier = Modifier.align(Alignment.TopEnd),
-                shape = RoundedCornerShape(50),
-                color = GymGold
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Star,
-                        contentDescription = null,
-                        tint = Color.Black,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.best_value_badge).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color.Black,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 10.sp
-                        )
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.monthly_membership).uppercase(),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = GymTextMuted,
-                        letterSpacing = 2.sp
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "₹",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = GymOrange,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = "${GymConstants.FEES_AMOUNT}",
-                        style = TextStyle(
-                            fontFamily = RajdhaniFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 68.sp,
-                            brush = Brush.linearGradient(listOf(GymOrange, GymAmber))
-                        )
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.fees_period),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    perks.forEach { perk ->
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = GymOrange.copy(alpha = 0.12f),
-                            border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.25f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.CheckCircle,
-                                    contentDescription = null,
-                                    tint = GymGreen,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = perk,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = GymTextPrimary,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WhatsAppJoinCard(
-    onWhatsAppClick: () -> Unit,
-    onCallClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = GymGreen.copy(alpha = 0.08f),
-        border = BorderStroke(1.dp, GymGreen.copy(alpha = 0.3f))
+        shape = RoundedCornerShape(20.dp),
+        color = GymInk
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 26.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(26.dp)
         ) {
-            Text(
-                text = stringResource(R.string.whatsapp_join_title).uppercase(),
-                style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.whatsapp_join_subtitle),
-                style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(22.dp))
-
-            Button(
-                onClick = onWhatsAppClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .minimumInteractiveComponentSize()
-                    .testTag("whatsapp_join_button"),
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GymGreen,
-                    contentColor = Color.White
-                ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.Chat,
-                    contentDescription = null,
-                    modifier = Modifier.size(26.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = stringResource(R.string.whatsapp_btn_small),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
+                Text(
+                    text = stringResource(R.string.monthly_membership),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = GymPaper,
+                        fontWeight = FontWeight.SemiBold
                     )
+                )
+                Surface(
+                    shape = CircleShape,
+                    color = GymAccent
+                ) {
                     Text(
-                        text = stringResource(R.string.whatsapp_btn_strong),
-                        style = MaterialTheme.typography.titleMedium.copy(
+                        text = stringResource(R.string.best_value_badge).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
                             color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.4.sp,
+                            fontSize = 10.sp
+                        ),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(26.dp))
 
             Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .clickable(onClick = onCallClick)
-                    .minimumInteractiveComponentSize()
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
-                    .testTag("call_gym_button"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Call,
-                    contentDescription = null,
-                    tint = GymGreen,
-                    modifier = Modifier.size(16.dp)
-                )
                 Text(
-                    text = stringResource(R.string.call_whatsapp_label),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
-                )
-                Text(
-                    text = stringResource(R.string.owner_phone_display),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = GymGreen,
-                        fontWeight = FontWeight.SemiBold
+                    text = "₹${GymConstants.FEES_AMOUNT}",
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontSize = 58.sp,
+                        lineHeight = 54.sp,
+                        letterSpacing = (-2.2).sp,
+                        color = GymPaper
                     )
                 )
+                Text(
+                    text = "per month",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = Color(0xFFB5B3AB)
+                    ),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "No hidden charges",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFFB5B3AB)
+                )
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+            HorizontalDivider(color = Color(0xFF2E2E2E))
+
+            perks.chunked(2).forEach { pair ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    pair.forEach { perk ->
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = perk,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = GymPaper,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier.padding(vertical = 14.dp)
+                            )
+                            HorizontalDivider(color = Color(0xFF282828))
+                        }
+                    }
+                    if (pair.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun FooterSection(
-    onOpenAdminPanel: () -> Unit
-) {
-    HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
-    Spacer(modifier = Modifier.height(20.dp))
-    Text(
-        text = stringResource(R.string.gym_full_name),
-        style = MaterialTheme.typography.titleMedium.copy(
-            color = GymOrange,
-            fontWeight = FontWeight.Bold
-        )
-    )
-    Spacer(modifier = Modifier.height(4.dp))
-    Text(
-        text = stringResource(R.string.footer_schedule),
-        style = MaterialTheme.typography.labelSmall.copy(color = GymTextMuted),
-        textAlign = TextAlign.Center
-    )
-    Spacer(modifier = Modifier.height(18.dp))
-    OutlinedButton(
-        onClick = onOpenAdminPanel,
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .testTag("owner_admin_button"),
-        shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, GymOrange.copy(alpha = 0.45f)),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = GymOrange.copy(alpha = 0.12f),
-            contentColor = GymOrange
-        ),
-        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 12.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.AdminPanelSettings,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = stringResource(R.string.owner_admin_panel),
-            style = MaterialTheme.typography.labelLarge
-        )
     }
 }
 

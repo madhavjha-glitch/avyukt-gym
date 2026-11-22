@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -24,7 +25,6 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.BatchFilter
 import com.example.data.model.DueUrgency
@@ -62,15 +63,16 @@ import com.example.data.model.GymBatch
 import com.example.data.model.GymMember
 import com.example.data.model.UiState
 import com.example.data.model.computeMemberDueInfo
+import com.example.ui.theme.GymAccent
 import com.example.ui.theme.GymBlue
-import com.example.ui.theme.GymBorder
-import com.example.ui.theme.GymCardBg
-import com.example.ui.theme.GymDarkSurface
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 
 @Composable
 fun AdminMembersTab(
@@ -105,7 +107,7 @@ fun AdminMembersTab(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -118,18 +120,16 @@ fun AdminMembersTab(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Group,
-                        contentDescription = null,
-                        tint = GymOrange
-                    )
                     Text(
-                        text = "MEMBERS",
-                        style = MaterialTheme.typography.headlineMedium.copy(color = GymTextPrimary)
+                        text = "Members",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = GymInk,
+                            fontWeight = FontWeight.ExtraBold
+                        )
                     )
                     Surface(
-                        shape = RoundedCornerShape(50),
-                        color = GymOrange
+                        shape = CircleShape,
+                        color = GymAccent
                     ) {
                         Text(
                             text = allMembers.size.toString(),
@@ -143,7 +143,7 @@ fun AdminMembersTab(
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
@@ -156,7 +156,7 @@ fun AdminMembersTab(
                         Icon(
                             imageVector = Icons.Rounded.Download,
                             contentDescription = stringResource(R.string.export_members_csv),
-                            tint = GymOrange
+                            tint = GymInk
                         )
                     }
 
@@ -165,11 +165,12 @@ fun AdminMembersTab(
                         modifier = Modifier
                             .minimumInteractiveComponentSize()
                             .testTag("add_member_button"),
-                        shape = RoundedCornerShape(50),
+                        shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = GymOrange,
-                            contentColor = Color.White
-                        )
+                            containerColor = GymInk,
+                            contentColor = GymPaper
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
@@ -191,27 +192,27 @@ fun AdminMembersTab(
                     .fillMaxWidth()
                     .testTag("member_search_input"),
                 singleLine = true,
-                shape = RoundedCornerShape(50),
+                shape = CircleShape,
                 placeholder = {
                     Text(
                         text = stringResource(R.string.search_members_hint),
-                        color = GymTextMuted
+                        color = GymInkMuted
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Rounded.Search,
                         contentDescription = null,
-                        tint = GymTextMuted
+                        tint = GymInkMuted
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = GymOrange,
-                    unfocusedBorderColor = GymBorder,
-                    focusedContainerColor = GymCardBg,
-                    unfocusedContainerColor = GymCardBg,
-                    focusedTextColor = GymTextPrimary,
-                    unfocusedTextColor = GymTextPrimary
+                    focusedBorderColor = GymInk,
+                    unfocusedBorderColor = GymLine,
+                    focusedContainerColor = GymSurface,
+                    unfocusedContainerColor = GymSurface,
+                    focusedTextColor = GymInk,
+                    unfocusedTextColor = GymInk
                 )
             )
         }
@@ -230,9 +231,9 @@ fun AdminMembersTab(
                             .weight(1f)
                             .minimumInteractiveComponentSize()
                             .testTag("batch_filter_${filter.name.lowercase()}"),
-                        shape = RoundedCornerShape(50),
-                        color = if (selected) GymOrange.copy(alpha = 0.2f) else GymCardBg,
-                        border = BorderStroke(1.dp, if (selected) GymOrange else GymBorder)
+                        shape = CircleShape,
+                        color = if (selected) GymInk else GymSurface,
+                        border = BorderStroke(1.dp, if (selected) GymInk else GymLine)
                     ) {
                         Box(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
@@ -241,8 +242,9 @@ fun AdminMembersTab(
                             Text(
                                 text = "${filter.label} ($count)",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = if (selected) GymOrange else GymTextMuted,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                    color = if (selected) GymPaper else GymInkSecondary,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    letterSpacing = 0.sp
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -262,7 +264,7 @@ fun AdminMembersTab(
                             .padding(40.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = GymOrange)
+                        CircularProgressIndicator(color = GymInk)
                     }
                 }
             }
@@ -280,9 +282,9 @@ fun AdminMembersTab(
                     item {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(1.dp, GymBorder)
+                            shape = RoundedCornerShape(20.dp),
+                            color = GymSurface,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -293,8 +295,8 @@ fun AdminMembersTab(
                                 Icon(
                                     imageVector = Icons.Rounded.Person,
                                     contentDescription = null,
-                                    tint = GymTextMuted.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(44.dp)
+                                    tint = GymInkMuted.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(40.dp)
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
@@ -303,7 +305,7 @@ fun AdminMembersTab(
                                     } else {
                                         "Koi member nahi hai. Add button se add karo."
                                     },
-                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymTextMuted)
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = GymInkMuted)
                                 )
                             }
                         }
@@ -318,8 +320,8 @@ fun AdminMembersTab(
                         val (dueLabel, dueColor) = when (dueInfo.urgency) {
                             DueUrgency.PAID -> "Paid" to GymGreen
                             DueUrgency.OVERDUE -> "Overdue ${-dueInfo.daysRemaining}d" to GymRed
-                            DueUrgency.DUE_SOON -> if (dueInfo.daysRemaining == 0L) "Due Today" to GymOrange else "Due ${dueInfo.daysRemaining}d" to GymOrange
-                            DueUrgency.UPCOMING -> "Pending" to GymTextMuted
+                            DueUrgency.DUE_SOON -> if (dueInfo.daysRemaining == 0L) "Due Today" to GymAccent else "Due ${dueInfo.daysRemaining}d" to GymAccent
+                            DueUrgency.UPCOMING -> "Pending" to GymInkSecondary
                         }
 
                         Surface(
@@ -327,9 +329,9 @@ fun AdminMembersTab(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("member_card_${member.id}"),
-                            shape = RoundedCornerShape(16.dp),
-                            color = GymCardBg,
-                            border = BorderStroke(1.dp, GymBorder)
+                            shape = RoundedCornerShape(18.dp),
+                            color = GymSurface,
+                            border = BorderStroke(1.dp, GymLine)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -343,42 +345,45 @@ fun AdminMembersTab(
                                     Text(
                                         text = member.name,
                                         style = MaterialTheme.typography.titleMedium.copy(
-                                            color = GymTextPrimary
+                                            color = GymInk,
+                                            fontWeight = FontWeight.SemiBold
                                         ),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = member.phone,
-                                        style = MaterialTheme.typography.bodySmall.copy(color = GymTextMuted)
+                                        style = MaterialTheme.typography.bodySmall.copy(color = GymInkSecondary)
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(6.dp))
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = GymBlue.copy(alpha = 0.14f)
+                                            shape = CircleShape,
+                                            color = GymBlue.copy(alpha = 0.1f)
                                         ) {
                                             Text(
                                                 text = batch.label,
                                                 style = MaterialTheme.typography.labelSmall.copy(
                                                     color = GymBlue,
-                                                    fontWeight = FontWeight.SemiBold
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    letterSpacing = 0.sp
                                                 ),
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                             )
                                         }
                                         Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = dueColor.copy(alpha = 0.14f)
+                                            shape = CircleShape,
+                                            color = dueColor.copy(alpha = 0.12f)
                                         ) {
                                             Text(
                                                 text = dueLabel,
                                                 style = MaterialTheme.typography.labelSmall.copy(
                                                     color = dueColor,
-                                                    fontWeight = FontWeight.SemiBold
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    letterSpacing = 0.sp
                                                 ),
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                             )
@@ -395,7 +400,7 @@ fun AdminMembersTab(
                                     Icon(
                                         imageVector = Icons.Rounded.Edit,
                                         contentDescription = "Edit ${member.name}",
-                                        tint = GymOrange
+                                        tint = GymInkSecondary
                                     )
                                 }
 
@@ -464,17 +469,17 @@ fun AdminMembersTab(
     if (toDelete != null) {
         AlertDialog(
             onDismissRequest = { memberPendingDelete = null },
-            containerColor = GymDarkSurface,
+            containerColor = GymSurface,
             title = {
                 Text(
                     text = "${toDelete.name} ko delete karo?",
-                    color = GymTextPrimary
+                    color = GymInk
                 )
             },
             text = {
                 Text(
                     text = "Is member ko delete karne par list se hata diya jayega.",
-                    color = GymTextMuted
+                    color = GymInkSecondary
                 )
             },
             confirmButton = {
@@ -483,17 +488,20 @@ fun AdminMembersTab(
                         onDeleteMember(toDelete)
                         memberPendingDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = GymRed)
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymRed,
+                        contentColor = Color.White
+                    )
                 ) {
                     Text("Delete")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { memberPendingDelete = null }) {
-                    Text("Cancel", color = GymTextMuted)
+                    Text("Cancel", color = GymInkMuted)
                 }
             }
         )
     }
 }
-

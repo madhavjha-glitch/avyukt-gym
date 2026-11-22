@@ -1,54 +1,57 @@
 package com.example.ui.theme
 
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val GymObsidian = Color(0xFF0D0D0D)
-val GymDarkSurface = Color(0xFF161616)
-val GymCardBg = Color(0xFF1E1E1E)
-val GymElevated = Color(0xFF252525)
-val GymOrange = Color(0xFFFF6B00)
-val GymOrangeLight = Color(0xFFFF8C33)
-val GymAmber = Color(0xFFFFAA00)
-val GymGold = Color(0xFFFFD700)
-val GymRed = Color(0xFFE63946)
-val GymGreen = Color(0xFF25D366)
-val GymGreenDark = Color(0xFF1DA851)
-val GymBlue = Color(0xFF4DABF7)
-val GymPurple = Color(0xFFBE4BDB)
-val GymTextPrimary = Color(0xFFF5F5F5)
-val GymTextMuted = Color(0xFFAAAAAA)
-val GymTextSubtle = Color(0xFF888888)
-val GymBorder = Color(0x14FFFFFF)
+val GymPaper = Color(0xFFF4F3EF)
+val GymSurface = Color(0xFFFFFFFF)
+val GymElevated = Color(0xFFECEAE3)
+val GymInk = Color(0xFF111111)
+val GymInkSecondary = Color(0xFF4A4944)
+val GymInkMuted = Color(0xFF75746D)
+val GymLine = Color(0xFFDEDCD5)
+
+val GymAccent = Color(0xFFE85D04)
+val GymAccentSoft = Color(0x1FE85D04)
+val GymGreen = Color(0xFF1E9E55)
+val GymRed = Color(0xFFC0392B)
+val GymBlue = Color(0xFF1D4ED8)
+val GymAmber = Color(0xFFD97706)
+val GymPurple = Color(0xFF6D28D9)
 
 val AvatarPalette = listOf(
-    GymOrange,
+    GymAccent,
     GymGreen,
     GymBlue,
-    GymGold,
+    GymAmber,
     GymRed,
     GymPurple
 )
 
-val GymDarkColorScheme = darkColorScheme(
-    primary = GymOrange,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFF3A1A00),
-    onPrimaryContainer = GymOrangeLight,
-    secondary = GymGreen,
+val GymLightColorScheme = lightColorScheme(
+    primary = GymInk,
+    onPrimary = GymPaper,
+    primaryContainer = GymAccentSoft,
+    onPrimaryContainer = GymAccent,
+    secondary = GymAccent,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFF0D2E1A),
-    onSecondaryContainer = GymGreen,
+    secondaryContainer = GymElevated,
+    onSecondaryContainer = GymInk,
     tertiary = GymBlue,
     onTertiary = Color.White,
-    background = GymObsidian,
-    onBackground = GymTextPrimary,
-    surface = GymDarkSurface,
-    onSurface = GymTextPrimary,
-    surfaceVariant = GymCardBg,
-    onSurfaceVariant = GymTextMuted,
+    background = GymPaper,
+    onBackground = GymInk,
+    surface = GymSurface,
+    onSurface = GymInk,
+    surfaceVariant = GymElevated,
+    onSurfaceVariant = GymInkSecondary,
+    surfaceContainerLowest = GymSurface,
+    surfaceContainerLow = GymPaper,
+    surfaceContainer = GymSurface,
     surfaceContainerHigh = GymElevated,
-    outline = GymBorder,
+    surfaceContainerHighest = GymLine,
+    outline = GymLine,
+    outlineVariant = GymLine,
     error = GymRed,
     onError = Color.White
 )

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Logout
@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,18 +69,22 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
 import com.example.data.model.GymMember
 import com.example.data.model.SyncState
 import com.example.data.model.UiState
-import com.example.ui.theme.GymDarkSurface
+import com.example.ui.theme.GymAccent
+import com.example.ui.theme.GymAccentSoft
 import com.example.ui.theme.GymGreen
-import com.example.ui.theme.GymObsidian
-import com.example.ui.theme.GymOrange
+import com.example.ui.theme.GymInk
+import com.example.ui.theme.GymInkMuted
+import com.example.ui.theme.GymInkSecondary
+import com.example.ui.theme.GymLine
+import com.example.ui.theme.GymPaper
 import com.example.ui.theme.GymRed
-import com.example.ui.theme.GymTextMuted
-import com.example.ui.theme.GymTextPrimary
+import com.example.ui.theme.GymSurface
 import com.example.util.CsvExportHelper
 import com.example.util.FeeReceiptHelper
 
@@ -195,19 +201,19 @@ fun AdminShellScreen(
     val (statusText, statusColor, statusIcon) = when (membersState) {
         is UiState.Loading -> Triple(
             stringResource(R.string.syncing_status),
-            GymOrange,
+            GymAccent,
             Icons.Rounded.CloudSync
         )
         is UiState.Error -> Triple("Error", GymRed, Icons.Rounded.CloudOff)
         is UiState.Success -> when (syncState) {
             SyncState.OFFLINE_SAVED -> Triple(
                 stringResource(R.string.offline_saved_status),
-                GymOrange,
+                GymAccent,
                 Icons.Rounded.CloudOff
             )
             SyncState.PENDING_SYNC -> Triple(
                 stringResource(R.string.pending_sync_status),
-                GymOrange,
+                GymAccent,
                 Icons.Rounded.CloudSync
             )
             SyncState.ONLINE_SYNCED -> Triple(
@@ -222,118 +228,135 @@ fun AdminShellScreen(
         val isExpanded = maxWidth >= 600.dp
 
         Scaffold(
-            containerColor = GymObsidian,
+            containerColor = GymPaper,
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = GymDarkSurface,
-                        titleContentColor = GymTextPrimary
-                    ),
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBackToPublicHome,
-                            modifier = Modifier
-                                .minimumInteractiveComponentSize()
-                                .testTag("admin_back_home_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = stringResource(R.string.back_to_gym_home),
-                                tint = GymTextPrimary
-                            )
-                        }
-                    },
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.gym_logo),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
+                Column {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = GymPaper,
+                            titleContentColor = GymInk
+                        ),
+                        navigationIcon = {
+                            IconButton(
+                                onClick = onBackToPublicHome,
                                 modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .border(2.dp, GymOrange, CircleShape)
-                            )
-                            Column {
-                                Text(
-                                    text = buildAnnotatedString {
-                                        append("AVYUKT ")
-                                        withStyle(SpanStyle(color = GymOrange)) {
-                                            append("GYM")
-                                        }
-                                    },
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                    .minimumInteractiveComponentSize()
+                                    .testTag("admin_back_home_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                    contentDescription = stringResource(R.string.back_to_gym_home),
+                                    tint = GymInk
                                 )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = statusIcon,
-                                        contentDescription = null,
-                                        tint = statusColor,
-                                        modifier = Modifier.size(12.dp)
-                                    )
+                            }
+                        },
+                        title = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.gym_logo),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(RoundedCornerShape(9.dp))
+                                        .border(1.dp, GymLine, RoundedCornerShape(9.dp))
+                                )
+                                Column {
                                     Text(
-                                        text = statusText,
-                                        style = MaterialTheme.typography.labelSmall.copy(color = statusColor)
+                                        text = buildAnnotatedString {
+                                            append("AVYUKT ")
+                                            withStyle(SpanStyle(color = GymAccent)) {
+                                                append("GYM")
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            letterSpacing = 0.8.sp,
+                                            color = GymInk
+                                        )
                                     )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = statusIcon,
+                                            contentDescription = null,
+                                            tint = statusColor,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Text(
+                                            text = statusText,
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                color = statusColor,
+                                                letterSpacing = 0.sp
+                                            )
+                                        )
+                                    }
                                 }
                             }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = onSignOut,
+                                modifier = Modifier
+                                    .minimumInteractiveComponentSize()
+                                    .testTag("admin_sign_out_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Rounded.Logout,
+                                    contentDescription = stringResource(R.string.sign_out_button),
+                                    tint = GymInkSecondary
+                                )
+                            }
                         }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = onSignOut,
-                            modifier = Modifier
-                                .minimumInteractiveComponentSize()
-                                .testTag("admin_sign_out_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.Logout,
-                                contentDescription = stringResource(R.string.sign_out_button),
-                                tint = GymTextMuted
-                            )
-                        }
-                    }
-                )
+                    )
+                    HorizontalDivider(color = GymLine)
+                }
             },
             bottomBar = {
                 if (!isExpanded) {
-                    NavigationBar(
-                        containerColor = GymDarkSurface,
-                        modifier = Modifier.navigationBarsPadding()
-                    ) {
-                        AdminTab.entries.forEach { tab ->
-                            val selected = activeTab == tab
-                            NavigationBarItem(
-                                selected = selected,
-                                onClick = { activeTab = tab },
-                                modifier = Modifier.testTag(tab.tag),
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
-                                        contentDescription = stringResource(tab.labelRes)
+                    Column {
+                        HorizontalDivider(color = GymLine)
+                        NavigationBar(
+                            containerColor = GymSurface,
+                            tonalElevation = 0.dp,
+                            modifier = Modifier.navigationBarsPadding()
+                        ) {
+                            AdminTab.entries.forEach { tab ->
+                                val selected = activeTab == tab
+                                NavigationBarItem(
+                                    selected = selected,
+                                    onClick = { activeTab = tab },
+                                    modifier = Modifier.testTag(tab.tag),
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
+                                            contentDescription = stringResource(tab.labelRes)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            text = stringResource(tab.labelRes),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                letterSpacing = 0.2.sp,
+                                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                            )
+                                        )
+                                    },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = GymAccent,
+                                        selectedTextColor = GymAccent,
+                                        indicatorColor = GymAccentSoft,
+                                        unselectedIconColor = GymInkMuted,
+                                        unselectedTextColor = GymInkMuted
                                     )
-                                },
-                                label = {
-                                    Text(
-                                        text = stringResource(tab.labelRes),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = GymOrange,
-                                    selectedTextColor = GymOrange,
-                                    indicatorColor = GymOrange.copy(alpha = 0.16f),
-                                    unselectedIconColor = GymTextMuted,
-                                    unselectedTextColor = GymTextMuted
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -346,7 +369,7 @@ fun AdminShellScreen(
             ) {
                 if (isExpanded) {
                     NavigationRail(
-                        containerColor = GymDarkSurface,
+                        containerColor = GymSurface,
                         modifier = Modifier.fillMaxHeight()
                     ) {
                         AdminTab.entries.forEach { tab ->
@@ -364,19 +387,23 @@ fun AdminShellScreen(
                                 label = {
                                     Text(
                                         text = stringResource(tab.labelRes),
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            letterSpacing = 0.2.sp,
+                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                        )
                                     )
                                 },
                                 colors = NavigationRailItemDefaults.colors(
-                                    selectedIconColor = GymOrange,
-                                    selectedTextColor = GymOrange,
-                                    indicatorColor = GymOrange.copy(alpha = 0.16f),
-                                    unselectedIconColor = GymTextMuted,
-                                    unselectedTextColor = GymTextMuted
+                                    selectedIconColor = GymAccent,
+                                    selectedTextColor = GymAccent,
+                                    indicatorColor = GymAccentSoft,
+                                    unselectedIconColor = GymInkMuted,
+                                    unselectedTextColor = GymInkMuted
                                 )
                             )
                         }
                     }
+                    VerticalDivider(color = GymLine)
                 }
 
                 Box(
@@ -385,7 +412,7 @@ fun AdminShellScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .widthIn(max = 720.dp)
+                            .widthIn(max = 760.dp)
                             .fillMaxSize()
                     ) {
                         when (activeTab) {

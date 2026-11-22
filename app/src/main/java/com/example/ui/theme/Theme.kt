@@ -18,7 +18,7 @@ fun AmitGymTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = GymDarkColorScheme,
+        colorScheme = GymLightColorScheme,
         typography = GymTypography,
         shapes = GymShapes,
         content = content
