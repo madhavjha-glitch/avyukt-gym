@@ -150,6 +150,28 @@
         </div>
 
         <div id="attendance-list" class="stack-list"></div>
+
+        <div id="att-chart-card" class="admin-card chart-card">
+          <div class="card-head">
+            <div>
+              <h3>Attendance Graph</h3>
+              <p id="att-chart-subtitle" class="chart-sub">Last 7 Days Trend</p>
+            </div>
+            <span id="att-chart-peak" class="chart-pill blue">Peak: 0</span>
+          </div>
+          <div class="chart-summary-row">
+            <div>
+              <div id="att-chart-avg" class="chart-big blue">0 / day</div>
+              <div class="chart-meta">7-Day Daily Average</div>
+            </div>
+            <div class="chart-meta-right">
+              <div id="att-chart-rate" class="chart-rate">0%</div>
+              <div class="chart-meta">Avg Turnout</div>
+            </div>
+          </div>
+          <div id="att-chart-svg" class="chart-svg-wrap" aria-label="7-Day Attendance Graph"></div>
+          <div id="att-chart-labels" class="chart-labels"></div>
+        </div>
       </section>
 
       <!-- FEES TAB -->
@@ -175,6 +197,31 @@
         </div>
 
         <div id="fees-list" class="stack-list"></div>
+
+        <div id="fees-chart-card" class="admin-card chart-card">
+          <div class="card-head">
+            <div>
+              <h3>Fees Collection Graph</h3>
+              <p id="fees-chart-subtitle" class="chart-sub">6-Month Revenue &amp; Status</p>
+            </div>
+            <span id="fees-chart-pct" class="chart-pill green">0% Paid</span>
+          </div>
+          <div class="chart-summary-row">
+            <div>
+              <div id="fees-chart-collected" class="chart-big green">₹0</div>
+              <div id="fees-chart-counts" class="chart-meta">0 Paid • 0 Pending</div>
+            </div>
+            <div class="chart-meta-right">
+              <div id="fees-chart-6m-total" class="chart-rate">₹0</div>
+              <div class="chart-meta">6-Month Total</div>
+            </div>
+          </div>
+          <div class="progress-track" aria-label="Paid vs Pending Ratio">
+            <div id="fees-progress-fill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <div id="fees-chart-svg" class="chart-svg-wrap" aria-label="6-Month Fees Graph"></div>
+          <div id="fees-chart-labels" class="chart-labels"></div>
+        </div>
       </section>
     </main>
 

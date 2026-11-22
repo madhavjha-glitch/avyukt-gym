@@ -670,29 +670,117 @@ function renderAttendance() {
   list.innerHTML = '';
   if (!filtered.length) {
     list.innerHTML = '<div class="admin-card"><p class="muted">Is batch filter me koi member nahi hai.</p></div>';
-    return;
+  } else {
+    filtered.forEach((m) => {
+      const present = attMap[m.id] === true;
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML = `
+        <div class="item-main">
+          <div class="item-title"></div>
+          <div class="item-sub"></div>
+        </div>
+      `;
+      card.querySelector('.item-title').textContent = m.name;
+      card.querySelector('.item-sub').textContent = `${m.phone} • ${batchLabel(m.batch)}`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `toggle-pill ${present ? 'present' : 'absent'}`;
+      btn.textContent = present ? 'Present' : 'Absent';
+      btn.addEventListener('click', () => setAttendance(m.id, !present));
+      card.appendChild(btn);
+      list.appendChild(card);
+    });
   }
 
-  filtered.forEach((m) => {
-    const present = attMap[m.id] === true;
-    const card = document.createElement('div');
-    card.className = 'item-card';
-    card.innerHTML = `
-      <div class="item-main">
-        <div class="item-title"></div>
-        <div class="item-sub"></div>
-      </div>
-    `;
-    card.querySelector('.item-title').textContent = m.name;
-    card.querySelector('.item-sub').textContent = `${m.phone} • ${batchLabel(m.batch)}`;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `toggle-pill ${present ? 'present' : 'absent'}`;
-    btn.textContent = present ? 'Present' : 'Absent';
-    btn.addEventListener('click', () => setAttendance(m.id, !present));
-    card.appendChild(btn);
-    list.appendChild(card);
+  renderAttendanceChart(filtered);
+}
+
+function renderAttendanceChart(filteredMembers) {
+  const anchorParts = (selectedAttDate || todayIso()).split('-').map(Number);
+  const anchor = anchorParts.length === 3
+    ? new Date(anchorParts[0], anchorParts[1] - 1, anchorParts[2])
+    : new Date();
+  const points = [];
+  for (let i = 6; i >= 0; i -= 1) {
+    const d = new Date(anchor);
+    d.setDate(anchor.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const iso = `${y}-${m}-${day}`;
+    const dayMap = allAttendanceDays[iso] || {};
+    const count = filteredMembers.filter((mem) => dayMap[mem.id] === true).length;
+    const label = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3);
+    points.push({ iso, label, count });
+  }
+
+  const totalDays = points.length || 1;
+  const sum = points.reduce((acc, p) => acc + p.count, 0);
+  const avg = (sum / totalDays).toFixed(1);
+  const peak = Math.max(0, ...points.map((p) => p.count));
+  const avgPct = filteredMembers.length ? Math.round((sum / (totalDays * filteredMembers.length)) * 100) : 0;
+
+  const attFilterLabel = attBatchFilter === 'ALL' ? 'All Batches' : batchLabel(attBatchFilter);
+  document.getElementById('att-chart-subtitle').textContent = `${attFilterLabel} • Ending ${formatDisplayDate(selectedAttDate)}`;
+  document.getElementById('att-chart-avg').textContent = `${avg} / day`;
+  document.getElementById('att-chart-peak').textContent = `Peak: ${peak}`;
+  document.getElementById('att-chart-rate').textContent = `${avgPct}%`;
+
+  const svgWrap = document.getElementById('att-chart-svg');
+  const labelsEl = document.getElementById('att-chart-labels');
+  const w = 360;
+  const h = 152;
+  const padX = 24;
+  const topY = 22;
+  const bottomY = 132;
+  const chartH = bottomY - topY;
+  const maxVal = Math.max(1, filteredMembers.length, peak);
+  const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
+
+  const coords = points.map((p, idx) => {
+    const x = padX + idx * stepX;
+    const y = bottomY - (p.count / maxVal) * chartH;
+    return { ...p, x, y };
   });
+
+  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const areaPath = coords.length
+    ? `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${bottomY} L${coords[0].x.toFixed(1)},${bottomY} Z`
+    : '';
+
+  const gridLines = [0, 0.5, 1].map((r) => {
+    const gy = (bottomY - r * chartH).toFixed(1);
+    return `<line x1="${padX}" y1="${gy}" x2="${w - padX}" y2="${gy}" stroke="#dedcd5" stroke-width="1" stroke-dasharray="3 4" />`;
+  }).join('');
+
+  const dotsAndValues = coords.map((c, idx) => {
+    const isAnchor = idx === coords.length - 1;
+    return `
+      <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${isAnchor ? 5.5 : 4}" fill="#ffffff" stroke="#2563eb" stroke-width="2.5" />
+      <text x="${c.x.toFixed(1)}" y="${(c.y - 10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="${isAnchor ? '#2563eb' : '#575752'}">${c.count}</text>
+    `;
+  }).join('');
+
+  svgWrap.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="7-Day Attendance Line Graph">
+      <defs>
+        <linearGradient id="attAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22" />
+          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.02" />
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      <path d="${areaPath}" fill="url(#attAreaGrad)" />
+      <path d="${linePath}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      ${dotsAndValues}
+    </svg>
+  `;
+
+  labelsEl.style.gridTemplateColumns = `repeat(${points.length}, minmax(0, 1fr))`;
+  labelsEl.innerHTML = points.map((p, idx) =>
+    `<span style="${idx === points.length - 1 ? 'color:#2563eb;font-weight:700;' : ''}">${p.label}</span>`
+  ).join('');
 }
 
 function renderFees() {
@@ -720,46 +808,118 @@ function renderFees() {
   list.innerHTML = '';
   if (!displayed.length) {
     list.innerHTML = '<div class="admin-card"><p class="muted">Is filter me koi member nahi hai.</p></div>';
-    return;
+  } else {
+    displayed.forEach((m) => {
+      const fee = feesMap[m.id];
+      const isPaid = fee?.paid === true;
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML = `
+        <div class="item-main">
+          <div class="item-title"></div>
+          <div class="item-sub"></div>
+        </div>
+        <div class="item-actions"></div>
+      `;
+      card.querySelector('.item-title').textContent = m.name;
+      card.querySelector('.item-sub').textContent = isPaid && fee?.paidDate
+        ? `${batchLabel(m.batch)} • Paid ${formatDisplayDate(fee.paidDate)}`
+        : `${batchLabel(m.batch)} • ₹${FEES_AMOUNT} baaki`;
+
+      const actions = card.querySelector('.item-actions');
+      if (!isPaid) {
+        const digits = (m.phone || '').replace(/\D/g, '');
+        const wa = digits.length === 10 ? `91${digits}` : digits;
+        const msg = `Namaste ${m.name} ji, Avyukt Gym ki ${formatMonthLabel(selectedFeesMonth)} mahine ki fees (₹${FEES_AMOUNT}) pending hai. Kripya jaldi jama kar dein. Dhanyavaad!`;
+        const remindLink = document.createElement('a');
+        remindLink.className = 'btn-whatsapp-sm small';
+        remindLink.href = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
+        remindLink.target = '_blank';
+        remindLink.rel = 'noopener';
+        remindLink.textContent = 'Remind';
+        actions.appendChild(remindLink);
+      }
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = `toggle-pill ${isPaid ? 'paid' : 'pending'}`;
+      toggleBtn.textContent = isPaid ? 'Fees Paid' : 'Fees Pending';
+      toggleBtn.addEventListener('click', () => setFeeStatus(selectedFeesMonth, m.id, !isPaid));
+      actions.appendChild(toggleBtn);
+      list.appendChild(card);
+    });
   }
 
-  displayed.forEach((m) => {
-    const fee = feesMap[m.id];
-    const isPaid = fee?.paid === true;
-    const card = document.createElement('div');
-    card.className = 'item-card';
-    card.innerHTML = `
-      <div class="item-main">
-        <div class="item-title"></div>
-        <div class="item-sub"></div>
-      </div>
-      <div class="item-actions"></div>
-    `;
-    card.querySelector('.item-title').textContent = m.name;
-    card.querySelector('.item-sub').textContent = isPaid && fee?.paidDate
-      ? `${batchLabel(m.batch)} • Paid ${formatDisplayDate(fee.paidDate)}`
-      : `${batchLabel(m.batch)} • ₹${FEES_AMOUNT} baaki`;
-
-    const actions = card.querySelector('.item-actions');
-    if (!isPaid) {
-      const digits = (m.phone || '').replace(/\D/g, '');
-      const wa = digits.length === 10 ? `91${digits}` : digits;
-      const msg = `Namaste ${m.name} ji, Avyukt Gym ki ${formatMonthLabel(selectedFeesMonth)} mahine ki fees (₹${FEES_AMOUNT}) pending hai. Kripya jaldi jama kar dein. Dhanyavaad!`;
-      const remindLink = document.createElement('a');
-      remindLink.className = 'btn-whatsapp-sm small';
-      remindLink.href = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
-      remindLink.target = '_blank';
-      remindLink.rel = 'noopener';
-      remindLink.textContent = 'Remind';
-      actions.appendChild(remindLink);
-    }
-
-    const toggleBtn = document.createElement('button');
-    toggleBtn.type = 'button';
-    toggleBtn.className = `toggle-pill ${isPaid ? 'paid' : 'pending'}`;
-    toggleBtn.textContent = isPaid ? 'Fees Paid' : 'Fees Pending';
-    toggleBtn.addEventListener('click', () => setFeeStatus(selectedFeesMonth, m.id, !isPaid));
-    actions.appendChild(toggleBtn);
-    list.appendChild(card);
-  });
+  renderFeesChart(paidCount, pendingCount);
 }
+
+function renderFeesChart(paidCount, pendingCount) {
+  const totalMembers = members.length;
+  const pct = totalMembers ? Math.round((paidCount / totalMembers) * 100) : 0;
+  const collectedMonth = paidCount * FEES_AMOUNT;
+
+  const [ay, am] = (selectedFeesMonth || currentMonthIso()).split('-').map(Number);
+  const anchorDate = (ay && am) ? new Date(ay, am - 1, 1) : new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i -= 1) {
+    const d = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const map = allFeeMonths[ym] || {};
+    const paid = members.filter((m) => map[m.id]?.paid === true).length;
+    const revenue = paid * FEES_AMOUNT;
+    const shortLabel = d.toLocaleDateString('en-US', { month: 'short' });
+    months.push({ ym, shortLabel, revenue });
+  }
+
+  const sixMonthTotal = months.reduce((acc, m) => acc + m.revenue, 0);
+  const maxRev = Math.max(FEES_AMOUNT, ...months.map((m) => m.revenue));
+
+  document.getElementById('fees-chart-subtitle').textContent = `${formatMonthLabel(selectedFeesMonth)} & 6-Month Trend`;
+  document.getElementById('fees-chart-pct').textContent = `${pct}% Paid`;
+  document.getElementById('fees-chart-collected').textContent = `₹${collectedMonth.toLocaleString('en-IN')}`;
+  document.getElementById('fees-chart-counts').textContent = `${paidCount} Paid • ${pendingCount} Pending`;
+  document.getElementById('fees-chart-6m-total').textContent = `₹${sixMonthTotal.toLocaleString('en-IN')}`;
+  document.getElementById('fees-progress-fill').style.width = `${pct}%`;
+
+  const svgWrap = document.getElementById('fees-chart-svg');
+  const labelsEl = document.getElementById('fees-chart-labels');
+  const w = 360;
+  const h = 152;
+  const padX = 14;
+  const topY = 24;
+  const bottomY = 136;
+  const chartH = bottomY - topY;
+  const slotW = (w - padX * 2) / months.length;
+  const barW = Math.min(34, slotW * 0.56);
+
+  const gridLines = [0, 0.5, 1].map((r) => {
+    const gy = (bottomY - r * chartH).toFixed(1);
+    return `<line x1="${padX}" y1="${gy}" x2="${w - padX}" y2="${gy}" stroke="#dedcd5" stroke-width="1" stroke-dasharray="3 4" />`;
+  }).join('');
+
+  const bars = months.map((m, idx) => {
+    const cx = padX + idx * slotW + slotW / 2;
+    const bx = cx - barW / 2;
+    const bh = Math.max(m.revenue > 0 ? 6 : 2, (m.revenue / maxRev) * chartH);
+    const by = bottomY - bh;
+    const isActive = m.ym === selectedFeesMonth;
+    const revText = m.revenue >= 1000 ? `₹${(m.revenue / 1000).toFixed(m.revenue % 1000 === 0 ? 0 : 1)}k` : `₹${m.revenue}`;
+    return `
+      <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="6" fill="${isActive ? '#15803d' : '#15803d'}" fill-opacity="${isActive ? '1' : '0.45'}" />
+      <text x="${cx.toFixed(1)}" y="${(by - 6).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${isActive ? '#15803d' : '#575752'}">${revText}</text>
+    `;
+  }).join('');
+
+  svgWrap.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="6-Month Fees Revenue Bar Graph">
+      ${gridLines}
+      ${bars}
+    </svg>
+  `;
+
+  labelsEl.style.gridTemplateColumns = `repeat(${months.length}, minmax(0, 1fr))`;
+  labelsEl.innerHTML = months.map((m) =>
+    `<span style="${m.ym === selectedFeesMonth ? 'color:#15803d;font-weight:700;' : ''}">${m.shortLabel}</span>`
+  ).join('');
+}
+

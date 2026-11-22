@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.ShowChart
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +61,7 @@ import com.example.ui.theme.GymInkMuted
 import com.example.ui.theme.GymInkSecondary
 import com.example.ui.theme.GymLine
 import com.example.ui.theme.GymPaper
+import com.example.ui.theme.GymRed
 import com.example.ui.theme.GymSurface
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -169,16 +171,194 @@ fun AdminAnalyticsCard(
 }
 
 @Composable
-private fun RevenueSixMonthChart(
+fun AttendanceTrendChartCard(
+    members: List<GymMember>,
+    allAttendanceDays: Map<String, Map<String, Boolean>>,
+    anchorDateIso: String
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("att_trend_chart_card"),
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ShowChart,
+                        contentDescription = null,
+                        tint = GymBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Attendance Graph (7 Days)",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = GymInk,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+                Text(
+                    text = "Upto ${AdminViewModel.formatDisplayDate(anchorDateIso)}",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        letterSpacing = 0.sp
+                    )
+                )
+            }
+            HorizontalDivider(color = GymLine)
+            AttendanceSevenDayChart(
+                members = members,
+                allAttendanceDays = allAttendanceDays,
+                anchorDateIso = anchorDateIso
+            )
+        }
+    }
+}
+
+@Composable
+fun FeesRevenueChartCard(
     members: List<GymMember>,
     allFeeMonths: Map<String, Map<String, FeeStatus>>,
-    currencyFormatter: NumberFormat
+    selectedMonth: String
+) {
+    val currencyFormatter = remember {
+        NumberFormat.getNumberInstance(Locale.Builder().setLanguage("en").setRegion("IN").build())
+    }
+    val monthFees = allFeeMonths[selectedMonth].orEmpty()
+    val paidCount = members.count { monthFees[it.id]?.paid == true }
+    val pendingCount = (members.size - paidCount).coerceAtLeast(0)
+    val paidRatio = if (members.isNotEmpty()) paidCount.toFloat() / members.size.toFloat() else 0f
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("fees_revenue_chart_card"),
+        shape = RoundedCornerShape(20.dp),
+        color = GymSurface,
+        border = BorderStroke(1.dp, GymLine)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.BarChart,
+                        contentDescription = null,
+                        tint = GymGreen,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Fees Collection Graph (6 Months)",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = GymInk,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+                Text(
+                    text = "${(paidRatio * 100).toInt()}% Paid",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = if (paidRatio >= 0.7f) GymGreen else GymAccent,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.sp
+                    )
+                )
+            }
+
+            if (members.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    ) {
+                        val w = size.width
+                        val h = size.height
+                        drawRoundRect(
+                            color = GymRed.copy(alpha = 0.16f),
+                            size = Size(w, h),
+                            cornerRadius = CornerRadius(h / 2f, h / 2f)
+                        )
+                        val paidW = (w * paidRatio).coerceIn(0f, w)
+                        if (paidW > 0f) {
+                            drawRoundRect(
+                                color = GymGreen,
+                                size = Size(paidW, h),
+                                cornerRadius = CornerRadius(h / 2f, h / 2f)
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${AdminViewModel.formatMonthLabel(selectedMonth)}: $paidCount Paid",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymGreen,
+                                letterSpacing = 0.sp
+                            )
+                        )
+                        Text(
+                            text = "$pendingCount Pending",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = GymRed,
+                                letterSpacing = 0.sp
+                            )
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(color = GymLine)
+
+            RevenueSixMonthChart(
+                members = members,
+                allFeeMonths = allFeeMonths,
+                currencyFormatter = currencyFormatter,
+                anchorMonthIso = selectedMonth
+            )
+        }
+    }
+}
+
+@Composable
+internal fun RevenueSixMonthChart(
+    members: List<GymMember>,
+    allFeeMonths: Map<String, Map<String, FeeStatus>>,
+    currencyFormatter: NumberFormat,
+    anchorMonthIso: String? = null
 ) {
     val activeMemberIds = remember(members) { members.map { it.id }.toSet() }
-    val monthSeries = remember(allFeeMonths, activeMemberIds) {
-        val nowYm = YearMonth.now()
+    val monthSeries = remember(allFeeMonths, activeMemberIds, anchorMonthIso) {
+        val anchorYm = anchorMonthIso?.let {
+            runCatching { YearMonth.parse(it) }.getOrNull()
+        } ?: YearMonth.now()
         (5L downTo 0L).map { offset ->
-            val ym = nowYm.minusMonths(offset)
+            val ym = anchorYm.minusMonths(offset)
             val key = ym.toString()
             val paidCount = allFeeMonths[key]
                 ?.entries
@@ -200,7 +380,7 @@ private fun RevenueSixMonthChart(
         ) {
             Column {
                 Text(
-                    text = "Last 6 Months Total",
+                    text = "6 Months Collection",
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = GymInkMuted,
                         letterSpacing = 0.sp
@@ -216,7 +396,7 @@ private fun RevenueSixMonthChart(
             }
             val currentPaid = monthSeries.lastOrNull()?.third ?: 0
             Text(
-                text = "Is Mahine: $currentPaid/${members.size} Paid",
+                text = "Selected: $currentPaid/${members.size} Paid",
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = GymInkMuted,
                     letterSpacing = 0.sp
@@ -305,15 +485,18 @@ private fun RevenueSixMonthChart(
 }
 
 @Composable
-private fun AttendanceSevenDayChart(
+internal fun AttendanceSevenDayChart(
     members: List<GymMember>,
-    allAttendanceDays: Map<String, Map<String, Boolean>>
+    allAttendanceDays: Map<String, Map<String, Boolean>>,
+    anchorDateIso: String? = null
 ) {
     val activeIds = remember(members) { members.map { it.id }.toSet() }
-    val daySeries = remember(allAttendanceDays, activeIds) {
-        val today = LocalDate.now()
+    val daySeries = remember(allAttendanceDays, activeIds, anchorDateIso) {
+        val anchorDate = anchorDateIso?.let {
+            runCatching { LocalDate.parse(it) }.getOrNull()
+        } ?: LocalDate.now()
         (6L downTo 0L).map { offset ->
-            val date = today.minusDays(offset)
+            val date = anchorDate.minusDays(offset)
             val key = date.toString()
             val present = allAttendanceDays[key]
                 ?.entries

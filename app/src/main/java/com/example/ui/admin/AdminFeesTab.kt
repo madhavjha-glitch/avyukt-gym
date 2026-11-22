@@ -80,6 +80,7 @@ import java.util.Locale
 fun AdminFeesTab(
     membersState: UiState<List<GymMember>>,
     feesState: UiState<Map<String, FeeStatus>>,
+    allFeeMonths: Map<String, Map<String, FeeStatus>>,
     selectedMonth: String,
     selectedFilter: FeeFilter,
     togglingMemberIds: Set<String>,
@@ -509,6 +510,14 @@ fun AdminFeesTab(
                     }
                 }
             }
+        }
+
+        item {
+            FeesRevenueChartCard(
+                members = members,
+                allFeeMonths = allFeeMonths,
+                selectedMonth = selectedMonth
+            )
         }
 
         item { Spacer(modifier = Modifier.height(12.dp)) }

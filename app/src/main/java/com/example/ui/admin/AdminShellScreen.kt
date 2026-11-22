@@ -458,6 +458,7 @@ fun AdminShellScreen(
                                 selectedDate = selectedAttDate,
                                 selectedBatchFilter = selectedAttBatchFilter,
                                 attendanceMap = attendanceForDate,
+                                allAttendanceDays = allAttendanceDays,
                                 monthlyCounts = monthlyCounts,
                                 onDateChange = viewModel::setAttDate,
                                 onBatchFilterChange = viewModel::setAttBatchFilter,
@@ -471,6 +472,7 @@ fun AdminShellScreen(
                             AdminTab.FEES -> AdminFeesTab(
                                 membersState = membersState,
                                 feesState = feesStateForMonth,
+                                allFeeMonths = allFeeMonths,
                                 selectedMonth = selectedFeesMonth,
                                 selectedFilter = selectedFeeFilter,
                                 togglingMemberIds = togglingFeeMemberIds,

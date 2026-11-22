@@ -78,6 +78,7 @@ fun AdminAttendanceTab(
     selectedDate: String,
     selectedBatchFilter: BatchFilter,
     attendanceMap: Map<String, Boolean>,
+    allAttendanceDays: Map<String, Map<String, Boolean>>,
     monthlyCounts: Map<String, Int>,
     onDateChange: (String) -> Unit,
     onBatchFilterChange: (BatchFilter) -> Unit,
@@ -413,6 +414,14 @@ fun AdminAttendanceTab(
                     }
                 }
             }
+        }
+
+        item {
+            AttendanceTrendChartCard(
+                members = filteredMembers,
+                allAttendanceDays = allAttendanceDays,
+                anchorDateIso = selectedDate
+            )
         }
 
         item { Spacer(modifier = Modifier.height(12.dp)) }

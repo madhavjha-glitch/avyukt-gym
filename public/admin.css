@@ -777,3 +777,107 @@ body {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Charts (Attendance & Fees Graphs) */
+.chart-card {
+  margin-top: 6px;
+}
+
+.chart-sub {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.chart-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chart-pill.blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.chart-pill.green {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.chart-summary-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-big {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.chart-big.blue { color: var(--blue); }
+.chart-big.green { color: var(--green); }
+
+.chart-meta {
+  font-size: 0.76rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.chart-meta-right {
+  text-align: right;
+}
+
+.chart-rate {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--red-soft);
+  border: 1px solid var(--red-border);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green);
+  transition: width 0.35s var(--ease);
+}
+
+.chart-svg-wrap {
+  width: 100%;
+  min-height: 148px;
+}
+
+.chart-svg-wrap svg {
+  width: 100%;
+  height: 152px;
+  display: block;
+  overflow: visible;
+}
+
+.chart-labels {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
