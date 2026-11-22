@@ -696,6 +696,138 @@ function renderAttendance() {
   renderAttendanceChart(filtered);
 }
 
+let attChartActiveIndex = null;
+let feesChartActiveIndex = null;
+
+function renderTradingLineSvg({
+  svgWrap,
+  labelsEl,
+  selectedLabelEl,
+  selectedValEl,
+  deltaEl,
+  points,
+  color,
+  gradId,
+  maxHint,
+  formatAxisVal,
+  formatDeltaVal,
+  getActiveIndex,
+  setActiveIndex
+}) {
+  if (!points.length) return;
+  const rawIdx = getActiveIndex();
+  const activeIdx = (rawIdx !== null && rawIdx >= 0 && rawIdx < points.length)
+    ? rawIdx
+    : points.length - 1;
+
+  const active = points[activeIdx];
+  const prev = activeIdx > 0 ? points[activeIdx - 1] : active;
+  const diff = active.value - prev.value;
+  const pct = activeIdx > 0 && prev.value > 0 ? Math.round((diff / prev.value) * 100) : null;
+
+  selectedLabelEl.textContent = active.detailLabel;
+  selectedValEl.textContent = active.valueText;
+
+  if (diff > 0) {
+    deltaEl.className = 'chart-delta up';
+    deltaEl.textContent = `▲ ${formatDeltaVal(diff)}${pct !== null ? ` (+${pct}%)` : ''}`;
+  } else if (diff < 0) {
+    deltaEl.className = 'chart-delta down';
+    deltaEl.textContent = `▼ ${formatDeltaVal(diff)}${pct !== null ? ` (${pct}%)` : ''}`;
+  } else {
+    deltaEl.className = 'chart-delta flat';
+    deltaEl.textContent = `• ${formatDeltaVal(0)}`;
+  }
+
+  const w = 380;
+  const h = 164;
+  const padLeft = 16;
+  const padRight = 46;
+  const topY = 16;
+  const bottomY = 144;
+  const chartW = w - padLeft - padRight;
+  const chartH = bottomY - topY;
+  const maxVal = Math.max(1, maxHint || 1, ...points.map((p) => p.value));
+  const stepX = points.length > 1 ? chartW / (points.length - 1) : 0;
+
+  const coords = points.map((p, idx) => {
+    const x = points.length === 1 ? padLeft + chartW / 2 : padLeft + idx * stepX;
+    const y = bottomY - (p.value / maxVal) * chartH;
+    return { ...p, x, y, idx };
+  });
+
+  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${bottomY} L${coords[0].x.toFixed(1)},${bottomY} Z`;
+
+  const gridAndAxis = [0, 0.5, 1].map((r) => {
+    const gy = (bottomY - r * chartH).toFixed(1);
+    const labelVal = formatAxisVal(maxVal * r);
+    return `
+      <line x1="${padLeft}" y1="${gy}" x2="${w - padRight}" y2="${gy}" stroke="#dedcd5" stroke-width="1" stroke-dasharray="3 4" />
+      <text x="${w - 4}" y="${(Number(gy) + 3.5).toFixed(1)}" text-anchor="end" font-size="10" font-weight="600" fill="#82827c">${labelVal}</text>
+    `;
+  }).join('');
+
+  const activeCoord = coords[activeIdx];
+  const crosshair = `
+    <line x1="${activeCoord.x.toFixed(1)}" y1="${topY}" x2="${activeCoord.x.toFixed(1)}" y2="${bottomY}" stroke="${color}" stroke-opacity="0.5" stroke-width="1.3" stroke-dasharray="4 4" />
+    <line x1="${padLeft}" y1="${activeCoord.y.toFixed(1)}" x2="${w - padRight}" y2="${activeCoord.y.toFixed(1)}" stroke="${color}" stroke-opacity="0.35" stroke-width="1.1" stroke-dasharray="4 4" />
+  `;
+
+  const dots = coords.map((c) => {
+    const isSelected = c.idx === activeIdx;
+    return isSelected
+      ? `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="9" fill="${color}" fill-opacity="0.18" />
+         <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="5" fill="#ffffff" stroke="${color}" stroke-width="2.8" />`
+      : `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="#ffffff" stroke="${color}" stroke-width="2" />`;
+  }).join('');
+
+  const slotW = points.length > 1 ? chartW / (points.length - 1) : chartW;
+  const hitZones = coords.map((c) => {
+    const hx = Math.max(0, c.x - slotW / 2);
+    return `<rect data-pt-idx="${c.idx}" x="${hx.toFixed(1)}" y="0" width="${slotW.toFixed(1)}" height="${h}" fill="transparent" style="cursor:pointer;" />`;
+  }).join('');
+
+  svgWrap.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Trading Style Line Graph">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.24" />
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.02" />
+        </linearGradient>
+      </defs>
+      ${gridAndAxis}
+      ${crosshair}
+      <path d="${areaPath}" fill="url(#${gradId})" />
+      <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+      ${dots}
+      ${hitZones}
+    </svg>
+  `;
+
+  svgWrap.querySelectorAll('rect[data-pt-idx]').forEach((rect) => {
+    const select = () => {
+      const nextIdx = Number(rect.dataset.ptIdx);
+      if (getActiveIndex() === nextIdx) return;
+      setActiveIndex(nextIdx);
+      renderTradingLineSvg({
+        svgWrap, labelsEl, selectedLabelEl, selectedValEl, deltaEl,
+        points, color, gradId, maxHint, formatAxisVal, formatDeltaVal,
+        getActiveIndex, setActiveIndex
+      });
+    };
+    rect.addEventListener('click', select);
+    rect.addEventListener('pointerenter', (ev) => {
+      if (ev.pointerType === 'mouse') select();
+    });
+  });
+
+  labelsEl.style.gridTemplateColumns = `repeat(${points.length}, minmax(0, 1fr))`;
+  labelsEl.innerHTML = points.map((p, idx) =>
+    `<span style="${idx === activeIdx ? `color:${color};font-weight:700;` : ''}">${p.shortLabel}</span>`
+  ).join('');
+}
+
 function renderAttendanceChart(filteredMembers) {
   const anchorParts = (selectedAttDate || todayIso()).split('-').map(Number);
   const anchor = anchorParts.length === 3
@@ -711,14 +843,21 @@ function renderAttendanceChart(filteredMembers) {
     const iso = `${y}-${m}-${day}`;
     const dayMap = allAttendanceDays[iso] || {};
     const count = filteredMembers.filter((mem) => dayMap[mem.id] === true).length;
-    const label = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3);
-    points.push({ iso, label, count });
+    const shortLabel = d.toLocaleDateString('en-US', { day: '2-digit' });
+    const detailLabel = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+    points.push({
+      iso,
+      shortLabel,
+      detailLabel,
+      value: count,
+      valueText: `${count} Present`
+    });
   }
 
   const totalDays = points.length || 1;
-  const sum = points.reduce((acc, p) => acc + p.count, 0);
+  const sum = points.reduce((acc, p) => acc + p.value, 0);
   const avg = (sum / totalDays).toFixed(1);
-  const peak = Math.max(0, ...points.map((p) => p.count));
+  const peak = Math.max(0, ...points.map((p) => p.value));
   const avgPct = filteredMembers.length ? Math.round((sum / (totalDays * filteredMembers.length)) * 100) : 0;
 
   const attFilterLabel = attBatchFilter === 'ALL' ? 'All Batches' : batchLabel(attBatchFilter);
@@ -727,60 +866,21 @@ function renderAttendanceChart(filteredMembers) {
   document.getElementById('att-chart-peak').textContent = `Peak: ${peak}`;
   document.getElementById('att-chart-rate').textContent = `${avgPct}%`;
 
-  const svgWrap = document.getElementById('att-chart-svg');
-  const labelsEl = document.getElementById('att-chart-labels');
-  const w = 360;
-  const h = 152;
-  const padX = 24;
-  const topY = 22;
-  const bottomY = 132;
-  const chartH = bottomY - topY;
-  const maxVal = Math.max(1, filteredMembers.length, peak);
-  const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
-
-  const coords = points.map((p, idx) => {
-    const x = padX + idx * stepX;
-    const y = bottomY - (p.count / maxVal) * chartH;
-    return { ...p, x, y };
+  renderTradingLineSvg({
+    svgWrap: document.getElementById('att-chart-svg'),
+    labelsEl: document.getElementById('att-chart-labels'),
+    selectedLabelEl: document.getElementById('att-chart-selected-label'),
+    selectedValEl: document.getElementById('att-chart-selected-val'),
+    deltaEl: document.getElementById('att-chart-delta'),
+    points,
+    color: '#2563eb',
+    gradId: 'attTradingGrad',
+    maxHint: Math.max(1, filteredMembers.length),
+    formatAxisVal: (v) => String(Math.round(v)),
+    formatDeltaVal: (d) => (d > 0 ? `+${Math.round(d)}` : `${Math.round(d)}`),
+    getActiveIndex: () => attChartActiveIndex,
+    setActiveIndex: (idx) => { attChartActiveIndex = idx; }
   });
-
-  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-  const areaPath = coords.length
-    ? `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${bottomY} L${coords[0].x.toFixed(1)},${bottomY} Z`
-    : '';
-
-  const gridLines = [0, 0.5, 1].map((r) => {
-    const gy = (bottomY - r * chartH).toFixed(1);
-    return `<line x1="${padX}" y1="${gy}" x2="${w - padX}" y2="${gy}" stroke="#dedcd5" stroke-width="1" stroke-dasharray="3 4" />`;
-  }).join('');
-
-  const dotsAndValues = coords.map((c, idx) => {
-    const isAnchor = idx === coords.length - 1;
-    return `
-      <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${isAnchor ? 5.5 : 4}" fill="#ffffff" stroke="#2563eb" stroke-width="2.5" />
-      <text x="${c.x.toFixed(1)}" y="${(c.y - 10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="${isAnchor ? '#2563eb' : '#575752'}">${c.count}</text>
-    `;
-  }).join('');
-
-  svgWrap.innerHTML = `
-    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="7-Day Attendance Line Graph">
-      <defs>
-        <linearGradient id="attAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22" />
-          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.02" />
-        </linearGradient>
-      </defs>
-      ${gridLines}
-      <path d="${areaPath}" fill="url(#attAreaGrad)" />
-      <path d="${linePath}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-      ${dotsAndValues}
-    </svg>
-  `;
-
-  labelsEl.style.gridTemplateColumns = `repeat(${points.length}, minmax(0, 1fr))`;
-  labelsEl.innerHTML = points.map((p, idx) =>
-    `<span style="${idx === points.length - 1 ? 'color:#2563eb;font-weight:700;' : ''}">${p.label}</span>`
-  ).join('');
 }
 
 function renderFees() {
@@ -860,7 +960,7 @@ function renderFeesChart(paidCount, pendingCount) {
 
   const [ay, am] = (selectedFeesMonth || currentMonthIso()).split('-').map(Number);
   const anchorDate = (ay && am) ? new Date(ay, am - 1, 1) : new Date();
-  const months = [];
+  const points = [];
   for (let i = 5; i >= 0; i -= 1) {
     const d = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
     const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -868,58 +968,46 @@ function renderFeesChart(paidCount, pendingCount) {
     const paid = members.filter((m) => map[m.id]?.paid === true).length;
     const revenue = paid * FEES_AMOUNT;
     const shortLabel = d.toLocaleDateString('en-US', { month: 'short' });
-    months.push({ ym, shortLabel, revenue });
+    const fullLabel = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    points.push({
+      ym,
+      shortLabel,
+      detailLabel: `${fullLabel} (${paid} Paid)`,
+      value: revenue,
+      valueText: `₹${revenue.toLocaleString('en-IN')}`
+    });
   }
 
-  const sixMonthTotal = months.reduce((acc, m) => acc + m.revenue, 0);
-  const maxRev = Math.max(FEES_AMOUNT, ...months.map((m) => m.revenue));
+  const sixMonthTotal = points.reduce((acc, p) => acc + p.value, 0);
 
-  document.getElementById('fees-chart-subtitle').textContent = `${formatMonthLabel(selectedFeesMonth)} & 6-Month Trend`;
+  document.getElementById('fees-chart-subtitle').textContent = `${formatMonthLabel(selectedFeesMonth)} & 6-Month Line Trend`;
   document.getElementById('fees-chart-pct').textContent = `${pct}% Paid`;
   document.getElementById('fees-chart-collected').textContent = `₹${collectedMonth.toLocaleString('en-IN')}`;
   document.getElementById('fees-chart-counts').textContent = `${paidCount} Paid • ${pendingCount} Pending`;
   document.getElementById('fees-chart-6m-total').textContent = `₹${sixMonthTotal.toLocaleString('en-IN')}`;
   document.getElementById('fees-progress-fill').style.width = `${pct}%`;
 
-  const svgWrap = document.getElementById('fees-chart-svg');
-  const labelsEl = document.getElementById('fees-chart-labels');
-  const w = 360;
-  const h = 152;
-  const padX = 14;
-  const topY = 24;
-  const bottomY = 136;
-  const chartH = bottomY - topY;
-  const slotW = (w - padX * 2) / months.length;
-  const barW = Math.min(34, slotW * 0.56);
-
-  const gridLines = [0, 0.5, 1].map((r) => {
-    const gy = (bottomY - r * chartH).toFixed(1);
-    return `<line x1="${padX}" y1="${gy}" x2="${w - padX}" y2="${gy}" stroke="#dedcd5" stroke-width="1" stroke-dasharray="3 4" />`;
-  }).join('');
-
-  const bars = months.map((m, idx) => {
-    const cx = padX + idx * slotW + slotW / 2;
-    const bx = cx - barW / 2;
-    const bh = Math.max(m.revenue > 0 ? 6 : 2, (m.revenue / maxRev) * chartH);
-    const by = bottomY - bh;
-    const isActive = m.ym === selectedFeesMonth;
-    const revText = m.revenue >= 1000 ? `₹${(m.revenue / 1000).toFixed(m.revenue % 1000 === 0 ? 0 : 1)}k` : `₹${m.revenue}`;
-    return `
-      <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="6" fill="${isActive ? '#15803d' : '#15803d'}" fill-opacity="${isActive ? '1' : '0.45'}" />
-      <text x="${cx.toFixed(1)}" y="${(by - 6).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${isActive ? '#15803d' : '#575752'}">${revText}</text>
-    `;
-  }).join('');
-
-  svgWrap.innerHTML = `
-    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="6-Month Fees Revenue Bar Graph">
-      ${gridLines}
-      ${bars}
-    </svg>
-  `;
-
-  labelsEl.style.gridTemplateColumns = `repeat(${months.length}, minmax(0, 1fr))`;
-  labelsEl.innerHTML = months.map((m) =>
-    `<span style="${m.ym === selectedFeesMonth ? 'color:#15803d;font-weight:700;' : ''}">${m.shortLabel}</span>`
-  ).join('');
+  renderTradingLineSvg({
+    svgWrap: document.getElementById('fees-chart-svg'),
+    labelsEl: document.getElementById('fees-chart-labels'),
+    selectedLabelEl: document.getElementById('fees-chart-selected-label'),
+    selectedValEl: document.getElementById('fees-chart-selected-val'),
+    deltaEl: document.getElementById('fees-chart-delta'),
+    points,
+    color: '#15803d',
+    gradId: 'feesTradingGrad',
+    maxHint: Math.max(FEES_AMOUNT, totalMembers * FEES_AMOUNT),
+    formatAxisVal: (v) => {
+      const iv = Math.round(v);
+      return iv >= 1000 ? `₹${(iv / 1000).toFixed(iv % 1000 === 0 ? 0 : 1)}k` : `₹${iv}`;
+    },
+    formatDeltaVal: (d) => {
+      const abs = Math.abs(Math.round(d)).toLocaleString('en-IN');
+      return `${d > 0 ? '+' : d < 0 ? '-' : ''}₹${abs}`;
+    },
+    getActiveIndex: () => feesChartActiveIndex,
+    setActiveIndex: (idx) => { feesChartActiveIndex = idx; }
+  });
 }
+
 

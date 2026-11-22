@@ -1,4 +1,4 @@
-const CACHE_NAME = 'avyukt-gym-v7';
+const CACHE_NAME = 'avyukt-gym-v8';
 const PRECACHE_URLS = [
   '/',
   '/index.html',

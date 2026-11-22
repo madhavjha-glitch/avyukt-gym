@@ -1,18 +1,20 @@
 package com.example.ui.admin
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,8 +40,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,12 +74,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 private enum class AnalyticsTab(val labelRes: Int) {
     REVENUE(R.string.analytics_tab_revenue),
     ATTENDANCE(R.string.analytics_tab_attendance),
     BATCHES(R.string.analytics_tab_batches)
 }
+
+private data class TradingPoint(
+    val shortLabel: String,
+    val detailLabel: String,
+    val value: Float,
+    val valueText: String
+)
 
 @Composable
 fun AdminAnalyticsCard(
@@ -103,7 +117,7 @@ fun AdminAnalyticsCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.BarChart,
+                    imageVector = Icons.Rounded.ShowChart,
                     contentDescription = null,
                     tint = GymInk,
                     modifier = Modifier.size(18.dp)
@@ -204,7 +218,7 @@ fun AttendanceTrendChartCard(
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Attendance Graph (7 Days)",
+                        text = "Attendance Trend Graph",
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = GymInk,
                             fontWeight = FontWeight.Bold
@@ -212,7 +226,7 @@ fun AttendanceTrendChartCard(
                     )
                 }
                 Text(
-                    text = "Upto ${AdminViewModel.formatDisplayDate(anchorDateIso)}",
+                    text = "7 Days • ${AdminViewModel.formatDisplayDate(anchorDateIso)}",
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = GymInkMuted,
                         letterSpacing = 0.sp
@@ -265,13 +279,13 @@ fun FeesRevenueChartCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.BarChart,
+                        imageVector = Icons.Rounded.ShowChart,
                         contentDescription = null,
                         tint = GymGreen,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Fees Collection Graph (6 Months)",
+                        text = "Fees Trend Graph",
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = GymInk,
                             fontWeight = FontWeight.Bold
@@ -353,7 +367,7 @@ internal fun RevenueSixMonthChart(
     anchorMonthIso: String? = null
 ) {
     val activeMemberIds = remember(members) { members.map { it.id }.toSet() }
-    val monthSeries = remember(allFeeMonths, activeMemberIds, anchorMonthIso) {
+    val monthSeries = remember(allFeeMonths, activeMemberIds, anchorMonthIso, currencyFormatter) {
         val anchorYm = anchorMonthIso?.let {
             runCatching { YearMonth.parse(it) }.getOrNull()
         } ?: YearMonth.now()
@@ -365,12 +379,19 @@ internal fun RevenueSixMonthChart(
                 ?.count { (id, status) -> status.paid && (activeMemberIds.isEmpty() || id in activeMemberIds) }
                 ?: 0
             val amount = paidCount * GymConstants.FEES_AMOUNT
-            Triple(ym.format(DateTimeFormatter.ofPattern("MMM")), amount, paidCount)
+            val short = ym.format(DateTimeFormatter.ofPattern("MMM"))
+            val detail = "${ym.format(DateTimeFormatter.ofPattern("MMM yyyy"))} ($paidCount Paid)"
+            TradingPoint(
+                shortLabel = short,
+                detailLabel = detail,
+                value = amount.toFloat(),
+                valueText = "₹${currencyFormatter.format(amount)}"
+            )
         }
     }
 
-    val total6Mo = monthSeries.sumOf { it.second }
-    val maxAmount = (monthSeries.maxOfOrNull { it.second } ?: 0).coerceAtLeast(GymConstants.FEES_AMOUNT)
+    val total6Mo = monthSeries.sumOf { it.value.toInt() }
+    val currentPaidAmount = monthSeries.lastOrNull()?.value?.toInt() ?: 0
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -394,9 +415,8 @@ internal fun RevenueSixMonthChart(
                     )
                 )
             }
-            val currentPaid = monthSeries.lastOrNull()?.third ?: 0
             Text(
-                text = "Selected: $currentPaid/${members.size} Paid",
+                text = "Latest: ₹${currencyFormatter.format(currentPaidAmount)}",
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = GymInkMuted,
                     letterSpacing = 0.sp
@@ -404,83 +424,21 @@ internal fun RevenueSixMonthChart(
             )
         }
 
-        if (total6Mo == 0) {
-            AnalyticsEmptyHint()
-        } else {
-            val animFraction by animateFloatAsState(
-                targetValue = 1f,
-                animationSpec = spring(dampingRatio = 0.8f, stiffness = 350f),
-                label = "revenue_bars"
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    monthSeries.forEach { (_, amount, _) ->
-                        Text(
-                            text = if (amount > 0) {
-                                if (amount >= 1000) "₹${String.format(Locale.US, "%.1fk", amount / 1000f)}" else "₹$amount"
-                            } else "₹0",
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = if (amount > 0) GymGreen else GymInkMuted,
-                                letterSpacing = 0.sp
-                            )
-                        )
-                    }
-                }
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(112.dp)
-                ) {
-                    val slotWidth = size.width / monthSeries.size
-                    val barWidth = (slotWidth * 0.44f).coerceAtMost(32.dp.toPx())
-                    val gridColor = Color(0xFFEAE8E0)
-
-                    for (i in 0..2) {
-                        val y = size.height * (i / 2f)
-                        drawLine(
-                            color = gridColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-
-                    monthSeries.forEachIndexed { index, (_, amount, _) ->
-                        val ratio = (amount.toFloat() / maxAmount.toFloat()).coerceIn(0f, 1f) * animFraction
-                        val barHeight = (size.height * ratio).coerceAtLeast(4.dp.toPx())
-                        val left = index * slotWidth + (slotWidth - barWidth) / 2f
-                        val top = size.height - barHeight
-                        drawRoundRect(
-                            color = if (amount > 0) GymGreen else GymElevated,
-                            topLeft = Offset(left, top),
-                            size = Size(barWidth, barHeight),
-                            cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    monthSeries.forEach { (label, _, _) ->
-                        Text(
-                            text = label,
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = GymInkMuted,
-                                letterSpacing = 0.sp
-                            )
-                        )
-                    }
-                }
+        TradingLineChart(
+            points = monthSeries,
+            lineColor = GymGreen,
+            axisScaleMaxHint = (members.size * GymConstants.FEES_AMOUNT).coerceAtLeast(GymConstants.FEES_AMOUNT).toFloat(),
+            formatAxisValue = { v ->
+                val iv = v.roundToInt()
+                if (iv >= 1000) "₹${String.format(Locale.US, "%.1fk", iv / 1000f).replace(".0k", "k")}" else "₹$iv"
+            },
+            formatDelta = { diff ->
+                val iv = diff.roundToInt()
+                val sign = if (iv > 0) "+" else if (iv < 0) "-" else ""
+                val absVal = kotlin.math.abs(iv)
+                "${sign}₹${currencyFormatter.format(absVal)}"
             }
-        }
+        )
     }
 }
 
@@ -502,13 +460,20 @@ internal fun AttendanceSevenDayChart(
                 ?.entries
                 ?.count { (id, isPresent) -> isPresent && (activeIds.isEmpty() || id in activeIds) }
                 ?: 0
-            date.format(DateTimeFormatter.ofPattern("dd")) to present
+            val short = date.format(DateTimeFormatter.ofPattern("dd"))
+            val detail = date.format(DateTimeFormatter.ofPattern("dd MMM"))
+            TradingPoint(
+                shortLabel = short,
+                detailLabel = detail,
+                value = present.toFloat(),
+                valueText = "$present Present"
+            )
         }
     }
 
-    val totalWeekPresent = daySeries.sumOf { it.second }
+    val totalWeekPresent = daySeries.sumOf { it.value.toInt() }
     val avg = if (daySeries.isNotEmpty()) totalWeekPresent / daySeries.size else 0
-    val maxCount = (daySeries.maxOfOrNull { it.second } ?: 1).coerceAtLeast(members.size.coerceAtLeast(1))
+    val peak = daySeries.maxOfOrNull { it.value.toInt() } ?: 0
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -533,7 +498,7 @@ internal fun AttendanceSevenDayChart(
                 )
             }
             Text(
-                text = "Peak: ${daySeries.maxOfOrNull { it.second } ?: 0}",
+                text = "Peak: $peak",
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = GymInkMuted,
                     letterSpacing = 0.sp
@@ -541,87 +506,326 @@ internal fun AttendanceSevenDayChart(
             )
         }
 
-        if (totalWeekPresent == 0) {
-            AnalyticsEmptyHint()
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    daySeries.forEach { (_, count) ->
-                        Text(
-                            text = count.toString(),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = if (count > 0) GymBlue else GymInkMuted,
-                                letterSpacing = 0.sp
-                            )
+        TradingLineChart(
+            points = daySeries,
+            lineColor = GymBlue,
+            axisScaleMaxHint = members.size.coerceAtLeast(1).toFloat(),
+            formatAxisValue = { v -> v.roundToInt().toString() },
+            formatDelta = { diff ->
+                val iv = diff.roundToInt()
+                if (iv > 0) "+$iv" else "$iv"
+            }
+        )
+    }
+}
+
+@Composable
+private fun TradingLineChart(
+    points: List<TradingPoint>,
+    lineColor: Color,
+    axisScaleMaxHint: Float,
+    formatAxisValue: (Float) -> String,
+    formatDelta: (Float) -> String
+) {
+    if (points.isEmpty()) {
+        AnalyticsEmptyHint()
+        return
+    }
+
+    var selectedIndex by remember(points) { mutableIntStateOf(points.lastIndex) }
+    val safeIndex = selectedIndex.coerceIn(0, points.lastIndex)
+    val selected = points[safeIndex]
+    val prev = if (safeIndex > 0) points[safeIndex - 1] else selected
+    val diff = selected.value - prev.value
+    val pct = if (safeIndex > 0 && prev.value > 0f) ((diff / prev.value) * 100f).roundToInt() else null
+
+    val maxPointValue = points.maxOfOrNull { it.value } ?: 0f
+    val maxScale = maxOf(axisScaleMaxHint, maxPointValue, 1f)
+    val midScale = maxScale / 2f
+
+    val deltaColor = when {
+        diff > 0f -> GymGreen
+        diff < 0f -> GymRed
+        else -> GymInkMuted
+    }
+    val deltaArrow = when {
+        diff > 0f -> "▲ "
+        diff < 0f -> "▼ "
+        else -> "• "
+    }
+    val deltaText = buildString {
+        append(deltaArrow)
+        append(formatDelta(diff))
+        if (pct != null) {
+            append(" (${if (pct > 0) "+" else ""}$pct%)")
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Trading ticker readout bar
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = GymPaper,
+            border = BorderStroke(1.dp, GymLine)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = selected.detailLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = GymInkMuted,
+                            letterSpacing = 0.sp
                         )
-                    }
+                    )
+                    Text(
+                        text = selected.valueText,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = GymInk,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    )
                 }
-
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(106.dp)
+                Surface(
+                    shape = CircleShape,
+                    color = deltaColor.copy(alpha = 0.12f)
                 ) {
-                    val slotWidth = size.width / daySeries.size
-                    val points = daySeries.mapIndexed { idx, (_, count) ->
-                        val x = idx * slotWidth + slotWidth / 2f
-                        val ratio = (count.toFloat() / maxCount.toFloat()).coerceIn(0f, 1f)
-                        val y = size.height - 10.dp.toPx() - (ratio * (size.height - 20.dp.toPx()))
-                        Offset(x, y)
-                    }
+                    Text(
+                        text = deltaText,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = deltaColor,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.sp
+                        )
+                    )
+                }
+            }
+        }
 
-                    if (points.size >= 2) {
-                        val fillPath = Path().apply {
-                            moveTo(points.first().x, size.height)
-                            points.forEach { lineTo(it.x, it.y) }
-                            lineTo(points.last().x, size.height)
-                            close()
+        // Chart canvas + right-side Y-axis scale (TradingView style)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(142.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .pointerInput(points) {
+                        detectTapGestures { offset ->
+                            val count = points.size
+                            if (count > 0 && size.width > 0) {
+                                val padX = 12.dp.toPx()
+                                val usableW = (size.width - padX * 2f).coerceAtLeast(1f)
+                                val idx = if (count == 1) 0 else {
+                                    (((offset.x - padX) / usableW) * (count - 1)).roundToInt()
+                                        .coerceIn(0, count - 1)
+                                }
+                                selectedIndex = idx
+                            }
                         }
-                        drawPath(
-                            path = fillPath,
-                            brush = Brush.verticalGradient(
-                                listOf(GymBlue.copy(alpha = 0.16f), Color.Transparent)
-                            )
-                        )
-
-                        val strokePath = Path().apply {
-                            moveTo(points.first().x, points.first().y)
-                            points.drop(1).forEach { lineTo(it.x, it.y) }
+                    }
+                    .pointerInput(points) {
+                        detectHorizontalDragGestures { change, _ ->
+                            val count = points.size
+                            if (count > 0 && size.width > 0) {
+                                val padX = 12.dp.toPx()
+                                val usableW = (size.width - padX * 2f).coerceAtLeast(1f)
+                                val idx = if (count == 1) 0 else {
+                                    (((change.position.x - padX) / usableW) * (count - 1)).roundToInt()
+                                        .coerceIn(0, count - 1)
+                                }
+                                selectedIndex = idx
+                            }
                         }
-                        drawPath(
-                            path = strokePath,
-                            color = GymBlue,
-                            style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
-                        )
                     }
+            ) {
+                val padX = 12.dp.toPx()
+                val topPad = 12.dp.toPx()
+                val bottomPad = 12.dp.toPx()
+                val chartW = (size.width - padX * 2f).coerceAtLeast(1f)
+                val chartH = (size.height - topPad - bottomPad).coerceAtLeast(1f)
+                val bottomY = topPad + chartH
 
-                    points.forEach { pt ->
-                        drawCircle(color = GymBlue, radius = 4.dp.toPx(), center = pt)
-                        drawCircle(color = GymSurface, radius = 2.dp.toPx(), center = pt)
-                    }
+                val dashEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
+                val gridColor = Color(0xFFDEDCD5)
+
+                // Dashed horizontal trading grid lines
+                listOf(0f, 0.5f, 1f).forEach { frac ->
+                    val gy = bottomY - frac * chartH
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(0f, gy),
+                        end = Offset(size.width, gy),
+                        strokeWidth = 1.dp.toPx(),
+                        pathEffect = dashEffect
+                    )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    daySeries.forEach { (dayLabel, _) ->
-                        Text(
-                            text = dayLabel,
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = GymInkMuted,
-                                letterSpacing = 0.sp
-                            )
+                val offsets = points.mapIndexed { idx, pt ->
+                    val x = if (points.size == 1) {
+                        padX + chartW / 2f
+                    } else {
+                        padX + (idx.toFloat() / (points.size - 1)) * chartW
+                    }
+                    val ratio = (pt.value / maxScale).coerceIn(0f, 1f)
+                    val y = bottomY - ratio * chartH
+                    Offset(x, y)
+                }
+
+                if (offsets.size >= 2) {
+                    val areaPath = Path().apply {
+                        moveTo(offsets.first().x, bottomY)
+                        offsets.forEach { lineTo(it.x, it.y) }
+                        lineTo(offsets.last().x, bottomY)
+                        close()
+                    }
+                    drawPath(
+                        path = areaPath,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                lineColor.copy(alpha = 0.24f),
+                                lineColor.copy(alpha = 0.02f)
+                            ),
+                            startY = topPad,
+                            endY = bottomY
+                        )
+                    )
+
+                    val linePath = Path().apply {
+                        moveTo(offsets.first().x, offsets.first().y)
+                        offsets.drop(1).forEach { lineTo(it.x, it.y) }
+                    }
+                    drawPath(
+                        path = linePath,
+                        color = lineColor,
+                        style = Stroke(
+                            width = 2.6.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
+                    )
+                }
+
+                // Crosshair dashed lines on active point
+                val activeOffset = offsets[safeIndex]
+                drawLine(
+                    color = lineColor.copy(alpha = 0.45f),
+                    start = Offset(activeOffset.x, topPad),
+                    end = Offset(activeOffset.x, bottomY),
+                    strokeWidth = 1.2.dp.toPx(),
+                    pathEffect = dashEffect
+                )
+                drawLine(
+                    color = lineColor.copy(alpha = 0.35f),
+                    start = Offset(0f, activeOffset.y),
+                    end = Offset(size.width, activeOffset.y),
+                    strokeWidth = 1.dp.toPx(),
+                    pathEffect = dashEffect
+                )
+
+                // Vertex dots + active trading highlight ring
+                offsets.forEachIndexed { idx, pt ->
+                    if (idx == safeIndex) {
+                        drawCircle(
+                            color = lineColor.copy(alpha = 0.20f),
+                            radius = 9.dp.toPx(),
+                            center = pt
+                        )
+                        drawCircle(
+                            color = lineColor,
+                            radius = 5.dp.toPx(),
+                            center = pt
+                        )
+                        drawCircle(
+                            color = GymSurface,
+                            radius = 2.5.dp.toPx(),
+                            center = pt
+                        )
+                    } else {
+                        drawCircle(
+                            color = lineColor,
+                            radius = 3.dp.toPx(),
+                            center = pt
+                        )
+                        drawCircle(
+                            color = GymSurface,
+                            radius = 1.4.dp.toPx(),
+                            center = pt
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            // Right Y-axis price/count scale
+            Column(
+                modifier = Modifier
+                    .width(42.dp)
+                    .fillMaxHeight()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = formatAxisValue(maxScale),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.sp
+                    ),
+                    maxLines = 1
+                )
+                Text(
+                    text = formatAxisValue(midScale),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.sp
+                    ),
+                    maxLines = 1
+                )
+                Text(
+                    text = formatAxisValue(0f),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = GymInkMuted,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.sp
+                    ),
+                    maxLines = 1
+                )
+            }
+        }
+
+        // Bottom X-axis labels matching canvas width
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 48.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            points.forEachIndexed { idx, pt ->
+                val isSelected = idx == safeIndex
+                Text(
+                    text = pt.shortLabel,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = if (isSelected) lineColor else GymInkMuted,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        letterSpacing = 0.sp
+                    )
+                )
             }
         }
     }

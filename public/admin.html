@@ -169,7 +169,14 @@
               <div class="chart-meta">Avg Turnout</div>
             </div>
           </div>
-          <div id="att-chart-svg" class="chart-svg-wrap" aria-label="7-Day Attendance Graph"></div>
+          <div class="chart-ticker-row">
+            <div>
+              <div id="att-chart-selected-label" class="chart-ticker-sub">Selected Day</div>
+              <div id="att-chart-selected-val" class="chart-ticker-val">0 Present</div>
+            </div>
+            <span id="att-chart-delta" class="chart-delta flat">• 0</span>
+          </div>
+          <div id="att-chart-svg" class="chart-svg-wrap" aria-label="7-Day Attendance Trading Line Graph"></div>
           <div id="att-chart-labels" class="chart-labels"></div>
         </div>
       </section>
@@ -219,7 +226,14 @@
           <div class="progress-track" aria-label="Paid vs Pending Ratio">
             <div id="fees-progress-fill" class="progress-fill" style="width: 0%;"></div>
           </div>
-          <div id="fees-chart-svg" class="chart-svg-wrap" aria-label="6-Month Fees Graph"></div>
+          <div class="chart-ticker-row">
+            <div>
+              <div id="fees-chart-selected-label" class="chart-ticker-sub">Selected Month</div>
+              <div id="fees-chart-selected-val" class="chart-ticker-val">₹0</div>
+            </div>
+            <span id="fees-chart-delta" class="chart-delta flat">• ₹0</span>
+          </div>
+          <div id="fees-chart-svg" class="chart-svg-wrap" aria-label="6-Month Fees Trading Line Graph"></div>
           <div id="fees-chart-labels" class="chart-labels"></div>
         </div>
       </section>
